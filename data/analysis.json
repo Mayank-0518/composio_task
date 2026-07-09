@@ -1,0 +1,301 @@
+{
+  "auth_distribution": {
+    "OAuth2": 43,
+    "API Key": 52,
+    "Basic Auth": 2,
+    "Bearer Token": 5,
+    "No Auth / Open": 1
+  },
+  "access_by_category": {
+    "CRM and Sales": {
+      "self_serve": 10,
+      "gated": 1
+    },
+    "Documents & Productivity": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Customer Service": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Customer Support": {
+      "self_serve": 3,
+      "gated": 0
+    },
+    "Unknown": {
+      "self_serve": 11,
+      "gated": 2
+    },
+    "Customer Service Management": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Customer Support / Helpdesk": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Communication": {
+      "self_serve": 2,
+      "gated": 0
+    },
+    "Communications Platform": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Communication and Collaboration": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Workplace Collaboration": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Team Communication": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Social / Communication": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Communication / Business Messaging": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Voice/Call Center": {
+      "self_serve": 0,
+      "gated": 1
+    },
+    "Communication & Network APIs": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Advertising": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Marketing": {
+      "self_serve": 0,
+      "gated": 1
+    },
+    "Marketing Automation": {
+      "self_serve": 3,
+      "gated": 0
+    },
+    "Social Media": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Email Service": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Ecommerce": {
+      "self_serve": 5,
+      "gated": 1
+    },
+    "Payments & Subscriptions": {
+      "self_serve": 0,
+      "gated": 1
+    },
+    "E-commerce & Retail": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "SEO and Digital Marketing": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "SEO & GEO Data": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Web Scraping / Data Extraction": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Web Data Platform": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Social media": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Data Enrichment / GTM Data": {
+      "self_serve": 0,
+      "gated": 1
+    },
+    "Integration Platform": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Developer Tools": {
+      "self_serve": 1,
+      "gated": 1
+    },
+    "Web Hosting / Developer Tools": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Graph Database": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Data Warehouse": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "E-commerce Platform": {
+      "self_serve": 0,
+      "gated": 1
+    },
+    "Payments and Subscriptions": {
+      "self_serve": 0,
+      "gated": 1
+    },
+    "Social Media Intelligence / OSINT": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Database as a Service (DBaaS)": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Monitoring and Observability": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Application Monitoring and Debugging": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Productivity and Note-Taking": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Database and Spreadsheet": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Project Management / Issue Tracking": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Project Management": {
+      "self_serve": 2,
+      "gated": 0
+    },
+    "Project Management and Collaboration": {
+      "self_serve": 2,
+      "gated": 0
+    },
+    "Work Management / Project Management": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Productivity / Document Automation": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Time Tracking and Project Management": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Payments and Financial Infrastructure": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Financial Data Platform": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Financial Trading": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Payment Processing": {
+      "self_serve": 2,
+      "gated": 0
+    },
+    "Accounting and Finance": {
+      "self_serve": 2,
+      "gated": 0
+    },
+    "Fintech / Corporate Spend Management": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "FinTech / Spend Management": {
+      "self_serve": 0,
+      "gated": 1
+    },
+    "Financial Data and Market Intelligence": {
+      "self_serve": 0,
+      "gated": 1
+    },
+    "AI/ML Tools": {
+      "self_serve": 0,
+      "gated": 1
+    },
+    "AI Assistant / Transcription": {
+      "self_serve": 0,
+      "gated": 1
+    },
+    "Meeting Intelligence": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Research & Knowledge Management": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Document Processing": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "AI Software Engineer": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "AI Content Generation": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Data Extraction": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Meeting Notes": {
+      "self_serve": 1,
+      "gated": 0
+    }
+  },
+  "buildability_breakdown": {
+    "Ready": 85,
+    "Feasible": 11,
+    "Gated": 7
+  },
+  "top_patterns": [
+    "OAuth2 dominates user-facing applications like CRM, Marketing, and Ecommerce, while API Keys are the standard for Developer Tools, Data Platforms, and many SaaS products.",
+    "The vast majority of APIs (over 80%) are marked 'Ready' for integration, indicating a mature and accessible API economy, but a significant minority require sales or admin approval.",
+    "Access friction is highest in high-value verticals like Financial Data (PitchBook), Payments (FanBasis), and Enterprise-focused tools, where gated access is common.",
+    "Developer Tools and Data Infrastructure APIs overwhelmingly favor API Keys for simplicity and programmatic access, contrasting with the user-centric OAuth2 flow."
+  ],
+  "easy_wins": [
+    "Pipedrive",
+    "GitHub",
+    "Shopify",
+    "Twilio",
+    "Airtable"
+  ],
+  "hard_nuts": [
+    "DealCloud",
+    "PitchBook",
+    "Ramp",
+    "Gladly",
+    "LinkedIn Ads"
+  ],
+  "executive_summary": "The API landscape is overwhelmingly buildable, with over 80% of applications marked 'Ready' for integration, signaling a low barrier to entry for new connections. A clear strategic pattern emerges: OAuth2 is the dominant authentication method for user-centric applications in CRM, marketing, and ecommerce, while API Keys remain the standard for developer tools and data platforms. However, significant opportunities and challenges lie in the gated access models. High-value verticals like financial data (PitchBook), payments (FanBasis), and enterprise software (DealCloud) often require sales or administrative approval, creating a barrier to rapid integration. Our strategy should prioritize the 'Easy Wins'\u2014self-serve, free-tier APIs\u2014for rapid market expansion, while concurrently developing a specialized playbook for navigating the 'Hard Nuts' to unlock high-value, enterprise-grade integrations."
+}

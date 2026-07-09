@@ -1,0 +1,154 @@
+{
+  "first_pass_accuracy": {
+    "primary_auth": "71.4%",
+    "buildability": "66.7%"
+  },
+  "sample_details": [
+    {
+      "app_name": "monday.com",
+      "field_name": "primary_auth",
+      "agent_value": "OAuth2",
+      "actual_value": "personal V2 API tokens",
+      "is_correct": false,
+      "evidence_url": "See Trajectory",
+      "notes": "The monday.com API documentation clearly states that it uses 'personal V2 API tokens' for authentication, not OAuth2. Authentication is done by passing the token in the Authorization header.",
+      "agent_trajectory": [
+        "SEARCH: monday.com API authentication method developer docs",
+        "SCRAPE: https://developer.monday.com/api-reference/docs/authentication",
+        "FINISH: {\"is_correct\": false, \"actual_value\": \"personal V2 API tokens\", \"explanation\": \"The monday.com API documentation clearly states that it uses 'personal V2 API tokens' for authentication, not OAuth2. Authentication is done by passing the token in the Authorization header.\"}"
+      ]
+    },
+    {
+      "app_name": "systeme.io",
+      "field_name": "primary_auth",
+      "agent_value": "API Key",
+      "actual_value": "API Key",
+      "is_correct": true,
+      "evidence_url": "See Trajectory",
+      "notes": "The official developer documentation for systeme.io's API explicitly states: 'To authenticate with the Systeme.io Public API, your only option right now is to attach your API key to the `X-API-Key` header of each request.' This confirms that API Key is the primary authentication method.",
+      "agent_trajectory": [
+        "SEARCH: systeme.io API authentication developer docs",
+        "SCRAPE: https://help.systeme.io/article/2329-how-to-use-systeme-io-public-api",
+        "SCRAPE: https://developer.systeme.io/reference/api",
+        "FINISH: {\"is_correct\": true, \"actual_value\": \"API Key\", \"explanation\": \"The official developer documentation for systeme.io's API explicitly states: 'To authenticate with the Systeme.io Public API, your only option right now is to attach your API key to the `X-API-Key` header of each request.' This confirms that API Key is the primary authentication method.\"}"
+      ]
+    },
+    {
+      "app_name": "Podio",
+      "field_name": "primary_auth",
+      "agent_value": "OAuth2",
+      "actual_value": "OAuth2",
+      "is_correct": true,
+      "evidence_url": "See Trajectory",
+      "notes": "The official Podio API documentation (https://developers.podio.com/authentication) explicitly states that 'The Podio API uses the OAuth2 protocol for authentication.' This confirms that OAuth2 is the primary authentication method.",
+      "agent_trajectory": [
+        "SEARCH: Podio API authentication method developer docs",
+        "FINISH: {\"is_correct\": true, \"actual_value\": \"OAuth2\", \"explanation\": \"The official Podio API documentation (https://developers.podio.com/authentication) explicitly states that 'The Podio API uses the OAuth2 protocol for authentication.' This confirms that OAuth2 is the primary authentication method.\"}"
+      ]
+    },
+    {
+      "app_name": "Netlify",
+      "field_name": "primary_auth",
+      "agent_value": "OAuth2",
+      "actual_value": "OAuth2",
+      "is_correct": true,
+      "evidence_url": "See Trajectory",
+      "notes": "The official Netlify API documentation explicitly states 'Netlify uses OAuth2 for authentication' and provides details on using OAuth2 access tokens for API requests. Personal Access Tokens (PATs) are generated through the OAuth2 flow and used with Bearer tokens for authentication.",
+      "agent_trajectory": [
+        "SEARCH: Netlify API authentication method developer docs OAuth API keys",
+        "SCRAPE: https://docs.netlify.com/api-and-cli-guides/api-guides/get-started-with-api/",
+        "FINISH: {\"is_correct\": true, \"actual_value\": \"OAuth2\", \"explanation\": \"The official Netlify API documentation explicitly states 'Netlify uses OAuth2 for authentication' and provides details on using OAuth2 access tokens for API requests. Personal Access Tokens (PATs) are generated through the OAuth2 flow and used with Bearer tokens for authentication.\"}"
+      ]
+    },
+    {
+      "app_name": "Netlify",
+      "field_name": "buildability",
+      "agent_value": "Ready",
+      "actual_value": "Ready",
+      "is_correct": true,
+      "evidence_url": "See Trajectory",
+      "notes": "The Netlify API documentation confirms a fully functional REST API with OAuth2 authentication, atomic deploys, file/ZIP upload methods, rate limiting, and comprehensive management capabilities. This demonstrates the API is production-ready and supports all necessary build operations.",
+      "agent_trajectory": [
+        "SEARCH: Netlify buildability status API ready developer documentation",
+        "SCRAPE: https://docs.netlify.com/api-and-cli-guides/api-guides/get-started-with-api/",
+        "FINISH: {\"is_correct\": true, \"actual_value\": \"Ready\", \"explanation\": \"The Netlify API documentation confirms a fully functional REST API with OAuth2 authentication, atomic deploys, file/ZIP upload methods, rate limiting, and comprehensive management capabilities. This demonstrates the API is production-ready and supports all necessary build operations.\"}"
+      ]
+    },
+    {
+      "app_name": "Zoho Cliq",
+      "field_name": "primary_auth",
+      "agent_value": "OAuth2",
+      "actual_value": "OAuth2",
+      "is_correct": true,
+      "evidence_url": "See Trajectory",
+      "notes": "The official Zoho Cliq API documentation explicitly states 'Zoho Cliq API uses the OAuth 2.0 protocol for authentication.' This directly confirms the claim that the primary authentication method is OAuth2.",
+      "agent_trajectory": [
+        "SEARCH: Zoho Cliq API authentication method OAuth2 developer docs",
+        "SCRAPE: https://www.zoho.com/cliq/help/restapi/v3/introduction/",
+        "FINISH: {\"is_correct\": true, \"actual_value\": \"OAuth2\", \"explanation\": \"The official Zoho Cliq API documentation explicitly states 'Zoho Cliq API uses the OAuth 2.0 protocol for authentication.' This directly confirms the claim that the primary authentication method is OAuth2.\"}"
+      ]
+    },
+    {
+      "app_name": "Vercel",
+      "field_name": "primary_auth",
+      "agent_value": "Bearer Token",
+      "actual_value": "Bearer Token",
+      "is_correct": true,
+      "evidence_url": "See Trajectory",
+      "notes": "The Vercel REST API documentation explicitly states that authentication is done using Vercel Access Tokens included in the Authorization header with the format 'Authorization: Bearer <TOKEN>'. This confirms that Bearer Token is the primary authentication method for the Vercel API.",
+      "agent_trajectory": [
+        "SEARCH: Vercel API authentication method developer docs",
+        "SCRAPE: https://vercel.com/docs/rest-api",
+        "FINISH: {\"is_correct\": true, \"actual_value\": \"Bearer Token\", \"explanation\": \"The Vercel REST API documentation explicitly states that authentication is done using Vercel Access Tokens included in the Authorization header with the format 'Authorization: Bearer <TOKEN>'. This confirms that Bearer Token is the primary authentication method for the Vercel API.\"}"
+      ]
+    },
+    {
+      "app_name": "Vercel",
+      "field_name": "buildability",
+      "agent_value": "Ready",
+      "actual_value": "Ready",
+      "is_correct": true,
+      "evidence_url": "See Trajectory",
+      "notes": "The Vercel Status page shows that the 'Builds' service is currently marked as 'Operational', indicating the build system is ready and functioning normally with no current incidents affecting builds.",
+      "agent_trajectory": [
+        "SEARCH: Vercel build system status ready",
+        "SCRAPE: https://www.vercel-status.com/",
+        "FINISH: {\"is_correct\": true, \"actual_value\": \"Ready\", \"explanation\": \"The Vercel Status page shows that the 'Builds' service is currently marked as 'Operational', indicating the build system is ready and functioning normally with no current incidents affecting builds.\"}"
+      ]
+    },
+    {
+      "app_name": "LiveAgent",
+      "field_name": "primary_auth",
+      "agent_value": "API Key",
+      "actual_value": "API Key",
+      "is_correct": false,
+      "evidence_url": "See Trajectory",
+      "notes": "While the claimed value 'API Key' is correct for LiveAgent's authentication method, there is no field called 'primary_auth' mentioned in the official documentation. The actual authentication uses an API key passed in the request header (e.g., 'apikey' header), not a field named 'primary_auth'.",
+      "agent_trajectory": [
+        "SEARCH: LiveAgent API authentication method developer docs",
+        "SCRAPE: https://support.liveagent.com/066804-LiveAgent-API",
+        "SCRAPE: https://support.liveagent.com/741982-API-key",
+        "SCRAPE: https://support.liveagent.com/840770-Complete-API-reference",
+        "FINISH: {\"is_correct\": false, \"actual_value\": \"API Key\", \"explanation\": \"While the claimed value 'API Key' is correct for LiveAgent's authentication method, there is no field called 'primary_auth' mentioned in the official documentation. The actual authentication uses an API key passed in the request header (e.g., 'apikey' header), not a field named 'primary_auth'.\"}"
+      ]
+    },
+    {
+      "app_name": "MongoDB Atlas",
+      "field_name": "buildability",
+      "agent_value": "Ready",
+      "actual_value": "Not Ready",
+      "is_correct": false,
+      "evidence_url": "See Trajectory",
+      "notes": "The MongoDB Atlas status page indicates severe and ongoing service disruptions in the AWS me-central-1 (UAE) and me-south-1 (Bahrain) regions. Workloads in these regions are described as 'significantly impaired' or 'currently not operational', making the service not ready for use in these areas. Therefore, the claim that Atlas is 'Ready' is incorrect.",
+      "agent_trajectory": [
+        "SEARCH: MongoDB Atlas status page service availability buildability",
+        "SCRAPE: https://status.mongodb.com/",
+        "FINISH: {\"is_correct\": false, \"actual_value\": \"Not Ready\", \"explanation\": \"The MongoDB Atlas status page indicates severe and ongoing service disruptions in the AWS me-central-1 (UAE) and me-south-1 (Bahrain) regions. Workloads in these regions are described as 'significantly impaired' or 'currently not operational', making the service not ready for use in these areas. Therefore, the claim that Atlas is 'Ready' is incorrect.\"}"
+      ]
+    }
+  ],
+  "common_errors": [
+    "To be populated by analyzer if needed"
+  ],
+  "unreachable_urls": 0
+}

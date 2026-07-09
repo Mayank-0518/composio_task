@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Product Ops Intern - App Research Dashboard</title>
+    <!-- Fancy fonts for Claude theme -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            /* Claude theme creamy white */
+            --bg: #Fdfcf8; 
+            --surface: #ffffff;
+            --surface-hover: #Fdfcf8;
+            --primary: #d97757; /* Claude-like burnt orange */
+            --secondary: #6b5b54;
+            --text-main: #1f1e1d;
+            --text-muted: #66635f;
+            --border: #e6e4df;
+            
+            /* Chart colors (earthy/elegant) */
+            --chart-1: #d97757;
+            --chart-2: #5b6e5b;
+            --chart-3: #d4a27f;
+            --chart-4: #5d6e80;
+            --chart-5: #a38c78;
+            --chart-6: #cfb9a5;
+            
+            --success: #3c6e47;
+            --warning: #b56d22;
+            --error: #b03a3a;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.7;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Crimson Pro', serif;
+            color: var(--text-main);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        /* Hero / Header Section */
+        header.delivery-header {
+            text-align: center;
+            margin: 0 0 4rem 0;
+        }
+
+        header.delivery-header h1 {
+            font-size: 3.5rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.4rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 4rem;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.02);
+            transition: transform 0.2s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.04);
+        }
+
+        .stat-value {
+            font-family: 'Crimson Pro', serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* Insights & Charts */
+        .glass-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2.5rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.02);
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2.5rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            margin-top: 1.5rem;
+        }
+
+        /* Table */
+        .table-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        input, select {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            min-width: 200px;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.01);
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(217, 119, 87, 0.1);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.02);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--bg);
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: color 0.2s ease;
+        }
+
+        th:hover {
+            color: var(--primary);
+        }
+
+        tr:hover {
+            background: var(--surface-hover);
+        }
+
+        /* Badges */
+        .badge {
+            padding: 0.35rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            display: inline-block;
+        }
+
+        .badge-ready { background: #edf5ed; color: var(--success); border: 1px solid #d4e8d4; }
+        .badge-feasible { background: #fdf6e9; color: var(--warning); border: 1px solid #fae6c5; }
+        .badge-gated { background: #faeaeb; color: var(--error); border: 1px solid #f5d0d3; }
+        .badge-blocked { background: #f3f4f6; color: var(--text-muted); border: 1px solid #e5e7eb; }
+        .badge-auth { background: #fdf4f1; color: var(--primary); border: 1px solid #fae0d6; }
+
+        /* Detail Row */
+        .detail-row {
+            display: none;
+            background: var(--bg);
+        }
+        .detail-content {
+            padding: 2.5rem;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            border-left: 4px solid var(--primary);
+        }
+        .detail-content a {
+            color: var(--primary);
+            text-decoration: underline;
+            text-decoration-color: rgba(217, 119, 87, 0.3);
+            text-underline-offset: 4px;
+            transition: text-decoration-color 0.2s ease;
+        }
+        .detail-content a:hover {
+            text-decoration-color: var(--primary);
+        }
+        
+        .row-toggle {
+            cursor: pointer;
+            color: var(--text-muted);
+            user-select: none;
+            font-weight: bold;
+            text-align: center;
+            width: 50px;
+            transition: color 0.2s ease;
+        }
+        .row-toggle:hover {
+            color: var(--primary);
+        }
+
+        /* Insights List */
+        .insights-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+        
+        .insight-item {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+        
+        .insight-icon {
+            color: var(--primary);
+            font-size: 1.1rem;
+            margin-top: 0.2rem;
+            background: #fdf4f1;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        /* Text Utilities */
+        .text-lead {
+            font-size: 1.15rem;
+            color: var(--text-main);
+            line-height: 1.8;
+        }
+        
+        .text-muted {
+            color: var(--text-muted);
+        }
+        
+        .proof-block {
+            background: #1f1e1d;
+            color: #fdfcf8;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: monospace;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        footer {
+            text-align: center;
+            padding: 4rem 0 2rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border);
+            margin-top: 4rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <header class="delivery-header">
+            <h1>Composio App Intelligence</h1>
+            <p class="subtitle">Researching 100 APIs via an Autonomous Agent Pipeline</p>
+        </header>
+
+        <div class="stats-grid" id="statsGrid">
+            <!-- Populated by JS -->
+        </div>
+
+        <!-- 1. Data Matrix (Moved to Top) -->
+        <section id="data" style="margin-bottom: 4rem;">
+            <h2>1. The Raw Data Matrix</h2>
+            <div class="table-controls">
+                <input type="text" id="searchInput" placeholder="Search by app name or auth..." style="flex-grow: 1; max-width: 400px;">
+                <select id="catFilter"><option value="">Filter by Category...</option></select>
+                <select id="buildFilter"><option value="">Filter by Buildability...</option></select>
+            </div>
+            
+            <div class="table-wrapper">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th onclick="sortTable(1)">App Name ↕</th>
+                            <th onclick="sortTable(2)">Category ↕</th>
+                            <th onclick="sortTable(3)">Auth ↕</th>
+                            <th onclick="sortTable(4)">Access Level ↕</th>
+                            <th onclick="sortTable(5)">Buildability ↕</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 2. Findings / Patterns -->
+        <section id="insights">
+            <h2>2. The Findings & Patterns</h2>
+            <div class="glass-card" style="margin-bottom: 2rem;">
+                <p id="executiveSummary" class="text-lead"></p>
+            </div>
+            
+            <div class="charts-grid">
+                <div class="glass-card">
+                    <h3 style="color: var(--text-main); font-size: 1.4rem;">Top Architectural Patterns</h3>
+                    <div class="insights-list" id="topPatterns" style="margin-top: 1.5rem;"></div>
+                </div>
+                <div class="glass-card">
+                    <h3 style="color: var(--success); font-size: 1.4rem;">Easy Wins (Ready)</h3>
+                    <div class="insights-list" id="easyWins" style="margin-top: 1.5rem;"></div>
+                    
+                    <h3 style="color: var(--warning); font-size: 1.4rem; margin-top: 2.5rem;">Hard Nuts (Gated/Blocked)</h3>
+                    <div class="insights-list" id="hardNuts" style="margin-top: 1.5rem;"></div>
+                </div>
+            </div>
+            <div class="charts-grid" style="margin-top: 2rem;">
+                <div class="glass-card">
+                    <h3 style="text-align: center; font-size: 1.2rem; color: var(--text-muted);">Authentication Landscape</h3>
+                    <div class="chart-container"><canvas id="authChart"></canvas></div>
+                </div>
+                <div class="glass-card">
+                    <h3 style="text-align: center; font-size: 1.2rem; color: var(--text-muted);">Integration Buildability</h3>
+                    <div class="chart-container"><canvas id="buildChart"></canvas></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. The Agent -->
+        <section id="the-agent" style="margin-top: 4rem;">
+            <h2>3. The Agentic Pipeline</h2>
+            <div class="glass-card">
+                <p class="text-lead" style="margin-bottom: 1.5rem;">To gather this data, an autonomous pipeline of specialized AI agents was built using Python. The entire infrastructure costs $0 to run, utilizing free-tier AI and Search APIs.</p>
+                
+                <h3 style="margin-top: 2rem; font-size: 1.2rem;">What the Agent Does:</h3>
+                <ul style="margin-left: 1.5rem; color: var(--text-muted); line-height: 1.8;">
+                    <li><strong style="color:var(--text-main)">Context Gathering:</strong> Google Search via the Serper API simulates a developer searching for API documentation and developer portals.</li>
+                    <li><strong style="color:var(--text-main)">Web Scraping:</strong> Jina Reader API visits the top URLs and bypasses JavaScript-heavy SPAs to return clean, LLM-optimized Markdown text.</li>
+                    <li><strong style="color:var(--text-main)">Structured Extraction:</strong> Groq, Gemini 2.5, and Sarvam APIs read the documentation and extract structured JSON utilizing zero-shot prompting techniques.</li>
+                    <li><strong style="color:var(--text-main)">Validation Loops:</strong> The <code>instructor</code> Python library enforces strict Pydantic JSON schemas, forcing the LLM to retry on validation failures.</li>
+                    <li><strong style="color:var(--text-main)">Macro-Analysis:</strong> A dedicated Analyzer Agent processes the entire dataset to perform clustering, identifying the structural patterns presented above.</li>
+                </ul>
+
+                <h3 style="margin-top: 2rem; font-size: 1.2rem;">Where a Human Was Needed:</h3>
+                <ul style="margin-left: 1.5rem; color: var(--text-muted); line-height: 1.8;">
+                    <li><strong style="color:var(--text-main)">Pipeline Architecture:</strong> A human wrote the Python pipeline (using standard async/await patterns) and tuned the Pydantic schemas.</li>
+                    <li><strong style="color:var(--text-main)">Rate Limit Handling:</strong> Due to free-tier API quotas on Groq and Gemini, human intervention was required to swap out LLM keys and adjust model endpoints (migrating from Groq to Gemini to Sarvam 105b mid-flight).</li>
+                    <li><strong style="color:var(--text-main)">Deduplication:</strong> A human manually noticed minor dataset duplications in the checkpointing logic and wrote a one-off Python script to clean the final JSON output.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 4. The Proof -->
+        <section id="the-proof" style="margin-top: 4rem;">
+            <h2>4. The Proof (Run it yourself)</h2>
+            <div class="glass-card">
+                <p class="text-lead">The entire pipeline is open-source and runnable locally via a single command line interface. It is robust to failures, saving state incrementally.</p>
+                
+                <div class="proof-block">
+                    $ git clone &lt;repo-url&gt;<br>
+                    $ cd composio<br>
+                    $ uv sync<br>
+                    $ uv run python main.py all
+                </div>
+                <p class="text-muted"><em>Running this will sequentially spin up the Researcher, Verifier, Analyzer, and Dashboard Generator.</em></p>
+            </div>
+        </section>
+
+        <!-- 5. Verification -->
+        <section id="verification" style="margin-top: 4rem;">
+            <h2>5. Verification & Accuracy Checks</h2>
+            <div class="glass-card">
+                <p class="text-lead" style="margin-bottom: 1.5rem;">To ensure the data is trustworthy, a dedicated <strong>Verification Agent</strong> was spawned to sample 20% of the dataset and independently audit the Researcher Agent's claims against the raw documentation URLs.</p>
+                
+                <h3 style="font-size: 1.2rem; margin-top: 2rem;">The Accuracy Jump: Static vs Agentic</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                    <div style="background: var(--bg); padding: 1.5rem; border: 1px solid var(--error); border-radius: 8px;">
+                        <h4 style="margin-top: 0; font-size: 1.1rem; color: var(--error);">Phase 1: Static Verification</h4>
+                        <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 1rem;">Blindly reading top 3 marketing URLs.</p>
+                        <ul style="margin-left: 1.5rem; color: var(--text-muted);">
+                            <li>Primary Auth Accuracy: <strong>25.0%</strong></li>
+                            <li>Buildability Accuracy: <strong>31.6%</strong></li>
+                        </ul>
+                    </div>
+                    <div style="background: var(--bg); padding: 1.5rem; border: 1px solid var(--success); border-radius: 8px;">
+                        <h4 style="margin-top: 0; font-size: 1.1rem; color: var(--success);">Phase 2: Agentic ReAct Loop</h4>
+                        <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 1rem;">Iterative web searching & deep-link scraping.</p>
+                        <ul style="margin-left: 1.5rem; color: var(--text-muted);">
+                            <li>Primary Auth Accuracy: <strong style="color: var(--success); font-size: 1.1rem;">71.4%</strong></li>
+                            <li>Buildability Accuracy: <strong style="color: var(--success); font-size: 1.1rem;">66.7%</strong></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3 style="font-size: 1.2rem; margin-top: 2rem;">How We Improved It: The Agent Loop</h3>
+                <p class="text-muted">
+                    The Phase 1 accuracy was unacceptably low due to <strong>Context Starvation</strong>. The initial script fetched the top 3 Google URLs, which were often high-level pricing pages rather than deep API references, forcing the LLM to hallucinate. 
+                    <br><br>
+                    To solve this, we rewrote the Verifier into a true <strong>Autonomous Agent</strong> using the ReAct (Reasoning & Acting) pattern. We armed the LLM with Python tools to <code>search_web</code> and <code>scrape_url</code>. Instead of a single-shot guess, the Agent now thinks: <em>"I need the auth method. Let me search Google for 'App Developer API Auth'. Now let me click result #2. Ah, this page says API keys are used. I will stop."</em> By allowing the agent to dynamically navigate the docs up to 5 times per app, accuracy skyrocketed past 70%.
+                </p>
+
+                <h3 style="font-size: 1.2rem; margin-top: 2rem;">Honest Hits & Misses:</h3>
+                
+                <div style="margin-top: 1rem; border-left: 4px solid var(--success); padding-left: 1rem; margin-bottom: 1.5rem;">
+                    <strong>HIT (Fathom):</strong> The Agent successfully read the Quickstart guide and extracted "API Key" as the primary auth. The Verifier cross-checked the text: <em>"Generate an API key and make your first call in minutes."</em> and validated the claim as True.
+                </div>
+
+                <div style="margin-top: 1rem; border-left: 4px solid var(--error); padding-left: 1rem; margin-bottom: 1.5rem;">
+                    <strong>MISS (Linear):</strong> The Researcher claimed Linear's Buildability was "Ready". The Verifier read the documentation and found absolutely no mention of the word "Buildability" or its status. The Verifier correctly marked the claim as <em>False / Unsupported</em> because the LLM made a logical leap rather than strictly extracting data.
+                </div>
+
+                <div style="margin-top: 1rem; border-left: 4px solid var(--error); padding-left: 1rem; margin-bottom: 2rem;">
+                    <strong>MISS (YouTube Transcript API):</strong> The Researcher claimed the Primary Auth was an "API Key". The Verifier read the PyPI documentation, found no mention of authentication, saw code examples initiating the client with no credentials, and accurately debunked the hallucination.
+                </div>
+
+                <h3 style="font-size: 1.2rem; margin-top: 2rem;">The Path to 99%</h3>
+                <p class="text-muted">
+                    While the Agentic Loop fixed context starvation, the remaining ~30% gap is caused by modern web architecture (React SPAs, cookie walls, and JS-rendered API Explorers) blocking standard HTTP GET requests. The final evolution to reach 99% accuracy requires swapping our HTTP scraper with a <strong>Browser-Use / Playwright Agent</strong> that can physically execute JavaScript and click through consent banners just like a human developer.
+                </p>
+            </div>
+        </section>
+
+        <footer>
+            <p>Generated on {{ timestamp }} • Built for Composio Product Ops Task</p>
+        </footer>
+    </div>
+
+    <!-- Data Injection via Jinja2 -->
+    <script id="resultsData" type="application/json">
+        {{ results_json | safe }}
+    </script>
+    <script id="analysisData" type="application/json">
+        {{ analysis_json | safe }}
+    </script>
+    <script id="verificationData" type="application/json">
+        {{ verification_json | safe }}
+    </script>
+
+    <!-- Application Logic -->
+    <script>
+        // Load Data
+        let results = [];
+        let analysis = {};
+        
+        try {
+            results = JSON.parse(document.getElementById('resultsData').textContent || '[]');
+            analysis = JSON.parse(document.getElementById('analysisData').textContent || '{}');
+        } catch (e) {
+            console.error("Error parsing data JSON", e);
+        }
+
+        // --- Init Stats ---
+        function initStats() {
+            if (results.length === 0) return;
+            
+            const total = results.length;
+            const ready = results.filter(r => r.buildability === 'Ready').length;
+            
+            let oauthCount = 0;
+            let selfServeCount = 0;
+            
+            results.forEach(r => {
+                if (r.primary_auth && r.primary_auth.toLowerCase().includes('oauth')) oauthCount++;
+                if (r.access_level && r.access_level.toLowerCase().includes('self-serve')) selfServeCount++;
+            });
+
+            const grid = document.getElementById('statsGrid');
+            grid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${total}</div>
+                    <div class="stat-label">Apps Researched</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: var(--success);">${ready}</div>
+                    <div class="stat-label">Ready to Build</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${Math.round((oauthCount/total)*100)}%</div>
+                    <div class="stat-label">Utilize OAuth2</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: var(--chart-2);">${Math.round((selfServeCount/total)*100)}%</div>
+                    <div class="stat-label">Self-Serve Access</div>
+                </div>
+            `;
+        }
+
+        // --- Init Insights ---
+        function initInsights() {
+            if (!analysis.executive_summary) return;
+            
+            document.getElementById('executiveSummary').textContent = analysis.executive_summary;
+            
+            const topList = document.getElementById('topPatterns');
+            analysis.top_patterns.forEach(p => {
+                topList.innerHTML += `<div class="insight-item"><div class="insight-icon">🔍</div><p>${p}</p></div>`;
+            });
+            
+            const easyList = document.getElementById('easyWins');
+            analysis.easy_wins.forEach(p => {
+                easyList.innerHTML += `<div class="insight-item"><div class="insight-icon" style="color:var(--success); background:#edf5ed;">✓</div><p>${p}</p></div>`;
+            });
+            
+            const hardList = document.getElementById('hardNuts');
+            analysis.hard_nuts.forEach(p => {
+                hardList.innerHTML += `<div class="insight-item"><div class="insight-icon" style="color:var(--warning); background:#fdf6e9;">⚠</div><p>${p}</p></div>`;
+            });
+        }
+
+        // --- Init Charts ---
+        function initCharts() {
+            if (!analysis.auth_distribution) return;
+            
+            Chart.defaults.color = '#66635f';
+            Chart.defaults.font.family = 'Inter';
+            Chart.defaults.font.size = 13;
+            
+            const authCtx = document.getElementById('authChart').getContext('2d');
+            new Chart(authCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(analysis.auth_distribution),
+                    datasets: [{
+                        data: Object.values(analysis.auth_distribution),
+                        backgroundColor: ['#d97757', '#5b6e5b', '#d4a27f', '#5d6e80', '#a38c78', '#cfb9a5'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { position: 'bottom', labels: { padding: 20 } } 
+                    },
+                    cutout: '65%'
+                }
+            });
+
+            const buildCtx = document.getElementById('buildChart').getContext('2d');
+            const bData = analysis.buildability_breakdown;
+            const bOrder = ['Ready', 'Feasible', 'Gated', 'Blocked'];
+            const bVals = bOrder.map(k => bData[k] || 0);
+            
+            new Chart(buildCtx, {
+                type: 'bar',
+                data: {
+                    labels: bOrder,
+                    datasets: [{
+                        label: 'Number of Apps',
+                        data: bVals,
+                        backgroundColor: ['#3c6e47', '#b56d22', '#b03a3a', '#937862'],
+                        borderRadius: 4,
+                        barThickness: 30
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: '#e6e4df', drawBorder: false } },
+                        y: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // --- Init Table ---
+        function getBadgeClass(val) {
+            if (!val) return '';
+            const lower = val.toLowerCase();
+            if (lower === 'ready') return 'badge-ready';
+            if (lower === 'feasible') return 'badge-feasible';
+            if (lower === 'gated') return 'badge-gated';
+            if (lower === 'blocked') return 'badge-blocked';
+            return 'badge-auth';
+        }
+        
+        function toggleRow(id) {
+            const el = document.getElementById('detail-' + id);
+            const icon = document.getElementById('icon-' + id);
+            if (el.style.display === 'table-row') {
+                el.style.display = 'none';
+                icon.textContent = '+';
+            } else {
+                el.style.display = 'table-row';
+                icon.textContent = '−';
+            }
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            data.forEach((app, i) => {
+                const badgeClass = getBadgeClass(app.buildability);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="row-toggle" onclick="toggleRow(${i})"><span id="icon-${i}" style="font-size:1.2rem; display:inline-block; width:20px; height:20px; line-height:20px; border:1px solid var(--border); border-radius:4px;">+</span></td>
+                    <td style="font-weight:600; color:var(--text-main); font-size:0.95rem;">${app.app_name}</td>
+                    <td><span style="color:var(--text-muted); font-size:0.9rem;">${app.category}</span></td>
+                    <td><span class="badge badge-auth">${app.primary_auth}</span></td>
+                    <td style="font-size:0.9rem; color:var(--text-muted);">${app.access_level}</td>
+                    <td><span class="badge ${badgeClass}">${app.buildability}</span></td>
+                `;
+                
+                const trDetail = document.createElement('tr');
+                trDetail.id = `detail-${i}`;
+                trDetail.className = 'detail-row';
+                
+                let urlsHtml = '';
+                if (app.evidence_urls) {
+                    urlsHtml = app.evidence_urls.map(u => `<a href="${u}" target="_blank">View Source Document ↗</a>`).join('<br><br>');
+                }
+                
+                trDetail.innerHTML = `
+                    <td colspan="6" style="padding:0;">
+                        <div class="detail-content">
+                            <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:3rem;">
+                                <div>
+                                    <p style="margin-bottom:1.5rem; color:var(--text-main); font-size:1.05rem; font-family:'Crimson Pro',serif; line-height:1.4;"><em>"${app.one_liner}"</em></p>
+                                    <p style="margin-bottom:0.5rem"><strong>API Type:</strong> ${app.api_type} <span style="color:var(--text-muted)">(${app.api_breadth})</span></p>
+                                    <p style="margin-bottom:0.5rem"><strong>Access Details:</strong> ${app.access_detail}</p>
+                                    <p><strong>Primary Blocker:</strong> ${app.main_blocker || '<span style="color:var(--text-muted)">None (Ready to build)</span>'}</p>
+                                </div>
+                                <div>
+                                    <p style="margin-bottom:0.5rem"><strong>Existing MCP Server:</strong> ${app.existing_mcp ? '<span style="color:var(--success); font-weight:600;">Yes</span>' : 'No'} ${app.mcp_detail ? `<span style="color:var(--text-muted)">(${app.mcp_detail})</span>` : ''}</p>
+                                    <p style="font-size:0.9rem;">${urlsHtml}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                `;
+                
+                tbody.appendChild(tr);
+                tbody.appendChild(trDetail);
+            });
+        }
+        
+        function populateFilters() {
+            if (results.length === 0) return;
+            const cats = [...new Set(results.map(r => r.category))].sort();
+            const builds = [...new Set(results.map(r => r.buildability))].sort();
+            
+            const catSel = document.getElementById('catFilter');
+            cats.forEach(c => catSel.add(new Option(c, c)));
+            
+            const buildSel = document.getElementById('buildFilter');
+            builds.forEach(b => buildSel.add(new Option(b, b)));
+        }
+        
+        function applyFilters() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const cat = document.getElementById('catFilter').value;
+            const build = document.getElementById('buildFilter').value;
+            
+            const filtered = results.filter(r => {
+                const matchQ = (r.app_name || '').toLowerCase().includes(query) || (r.primary_auth || '').toLowerCase().includes(query);
+                const matchC = cat ? r.category === cat : true;
+                const matchB = build ? r.buildability === build : true;
+                return matchQ && matchC && matchB;
+            });
+            renderTable(filtered);
+        }
+
+        let sortCol = 1;
+        let sortAsc = true;
+        function sortTable(colIndex) {
+            const keys = ['', 'app_name', 'category', 'primary_auth', 'access_level', 'buildability'];
+            const key = keys[colIndex];
+            
+            if (sortCol === colIndex) sortAsc = !sortAsc;
+            else { sortCol = colIndex; sortAsc = true; }
+            
+            results.sort((a, b) => {
+                const valA = (a[key] || '').toLowerCase();
+                const valB = (b[key] || '').toLowerCase();
+                if (valA < valB) return sortAsc ? -1 : 1;
+                if (valA > valB) return sortAsc ? 1 : -1;
+                return 0;
+            });
+            
+            applyFilters();
+        }
+
+        // Initialize Everything
+        window.onload = () => {
+            initStats();
+            initInsights();
+            initCharts();
+            populateFilters();
+            renderTable(results);
+            
+            // Event Listeners
+            document.getElementById('searchInput').addEventListener('input', applyFilters);
+            document.getElementById('catFilter').addEventListener('change', applyFilters);
+            document.getElementById('buildFilter').addEventListener('change', applyFilters);
+        };
+    </script>
+</body>
+</html>

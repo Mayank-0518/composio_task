@@ -1,0 +1,3966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Product Ops Intern - App Research Dashboard</title>
+    <!-- Fancy fonts for Claude theme -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            /* Claude theme creamy white */
+            --bg: #Fdfcf8; 
+            --surface: #ffffff;
+            --surface-hover: #Fdfcf8;
+            --primary: #d97757; /* Claude-like burnt orange */
+            --secondary: #6b5b54;
+            --text-main: #1f1e1d;
+            --text-muted: #66635f;
+            --border: #e6e4df;
+            
+            /* Chart colors (earthy/elegant) */
+            --chart-1: #d97757;
+            --chart-2: #5b6e5b;
+            --chart-3: #d4a27f;
+            --chart-4: #5d6e80;
+            --chart-5: #a38c78;
+            --chart-6: #cfb9a5;
+            
+            --success: #3c6e47;
+            --warning: #b56d22;
+            --error: #b03a3a;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.7;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Crimson Pro', serif;
+            color: var(--text-main);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        /* Hero / Header Section */
+        header.delivery-header {
+            text-align: center;
+            margin: 0 0 4rem 0;
+        }
+
+        header.delivery-header h1 {
+            font-size: 3.5rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.4rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 4rem;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.02);
+            transition: transform 0.2s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.04);
+        }
+
+        .stat-value {
+            font-family: 'Crimson Pro', serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* Insights & Charts */
+        .glass-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2.5rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.02);
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2.5rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            margin-top: 1.5rem;
+        }
+
+        /* Table */
+        .table-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        input, select {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            min-width: 200px;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.01);
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(217, 119, 87, 0.1);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.02);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--bg);
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: color 0.2s ease;
+        }
+
+        th:hover {
+            color: var(--primary);
+        }
+
+        tr:hover {
+            background: var(--surface-hover);
+        }
+
+        /* Badges */
+        .badge {
+            padding: 0.35rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            display: inline-block;
+        }
+
+        .badge-ready { background: #edf5ed; color: var(--success); border: 1px solid #d4e8d4; }
+        .badge-feasible { background: #fdf6e9; color: var(--warning); border: 1px solid #fae6c5; }
+        .badge-gated { background: #faeaeb; color: var(--error); border: 1px solid #f5d0d3; }
+        .badge-blocked { background: #f3f4f6; color: var(--text-muted); border: 1px solid #e5e7eb; }
+        .badge-auth { background: #fdf4f1; color: var(--primary); border: 1px solid #fae0d6; }
+
+        /* Detail Row */
+        .detail-row {
+            display: none;
+            background: var(--bg);
+        }
+        .detail-content {
+            padding: 2.5rem;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            border-left: 4px solid var(--primary);
+        }
+        .detail-content a {
+            color: var(--primary);
+            text-decoration: underline;
+            text-decoration-color: rgba(217, 119, 87, 0.3);
+            text-underline-offset: 4px;
+            transition: text-decoration-color 0.2s ease;
+        }
+        .detail-content a:hover {
+            text-decoration-color: var(--primary);
+        }
+        
+        .row-toggle {
+            cursor: pointer;
+            color: var(--text-muted);
+            user-select: none;
+            font-weight: bold;
+            text-align: center;
+            width: 50px;
+            transition: color 0.2s ease;
+        }
+        .row-toggle:hover {
+            color: var(--primary);
+        }
+
+        /* Insights List */
+        .insights-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+        
+        .insight-item {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+        
+        .insight-icon {
+            color: var(--primary);
+            font-size: 1.1rem;
+            margin-top: 0.2rem;
+            background: #fdf4f1;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        /* Text Utilities */
+        .text-lead {
+            font-size: 1.15rem;
+            color: var(--text-main);
+            line-height: 1.8;
+        }
+        
+        .text-muted {
+            color: var(--text-muted);
+        }
+        
+        .proof-block {
+            background: #1f1e1d;
+            color: #fdfcf8;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: monospace;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        footer {
+            text-align: center;
+            padding: 4rem 0 2rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border);
+            margin-top: 4rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <header class="delivery-header">
+            <h1>Composio App Intelligence</h1>
+            <p class="subtitle">Researching 100 APIs via an Autonomous Agent Pipeline</p>
+        </header>
+
+        <div class="stats-grid" id="statsGrid">
+            <!-- Populated by JS -->
+        </div>
+
+        <!-- 1. Data Matrix (Moved to Top) -->
+        <section id="data" style="margin-bottom: 4rem;">
+            <h2>1. The Raw Data Matrix</h2>
+            <div class="table-controls">
+                <input type="text" id="searchInput" placeholder="Search by app name or auth..." style="flex-grow: 1; max-width: 400px;">
+                <select id="catFilter"><option value="">Filter by Category...</option></select>
+                <select id="buildFilter"><option value="">Filter by Buildability...</option></select>
+            </div>
+            
+            <div class="table-wrapper">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th onclick="sortTable(1)">App Name ↕</th>
+                            <th onclick="sortTable(2)">Category ↕</th>
+                            <th onclick="sortTable(3)">Auth ↕</th>
+                            <th onclick="sortTable(4)">Access Level ↕</th>
+                            <th onclick="sortTable(5)">Buildability ↕</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 2. Findings / Patterns -->
+        <section id="insights">
+            <h2>2. The Findings & Patterns</h2>
+            <div class="glass-card" style="margin-bottom: 2rem;">
+                <p id="executiveSummary" class="text-lead"></p>
+            </div>
+            
+            <div class="charts-grid">
+                <div class="glass-card">
+                    <h3 style="color: var(--text-main); font-size: 1.4rem;">Top Architectural Patterns</h3>
+                    <div class="insights-list" id="topPatterns" style="margin-top: 1.5rem;"></div>
+                </div>
+                <div class="glass-card">
+                    <h3 style="color: var(--success); font-size: 1.4rem;">Easy Wins (Ready)</h3>
+                    <div class="insights-list" id="easyWins" style="margin-top: 1.5rem;"></div>
+                    
+                    <h3 style="color: var(--warning); font-size: 1.4rem; margin-top: 2.5rem;">Hard Nuts (Gated/Blocked)</h3>
+                    <div class="insights-list" id="hardNuts" style="margin-top: 1.5rem;"></div>
+                </div>
+            </div>
+            <div class="charts-grid" style="margin-top: 2rem;">
+                <div class="glass-card">
+                    <h3 style="text-align: center; font-size: 1.2rem; color: var(--text-muted);">Authentication Landscape</h3>
+                    <div class="chart-container"><canvas id="authChart"></canvas></div>
+                </div>
+                <div class="glass-card">
+                    <h3 style="text-align: center; font-size: 1.2rem; color: var(--text-muted);">Integration Buildability</h3>
+                    <div class="chart-container"><canvas id="buildChart"></canvas></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. The Agent -->
+        <section id="the-agent" style="margin-top: 4rem;">
+            <h2>3. The Agentic Pipeline</h2>
+            <div class="glass-card">
+                <p class="text-lead" style="margin-bottom: 1.5rem;">To gather this data, an autonomous pipeline of specialized AI agents was built using Python. The entire infrastructure costs $0 to run, utilizing free-tier AI and Search APIs.</p>
+                
+                <h3 style="margin-top: 2rem; font-size: 1.2rem;">What the Agent Does:</h3>
+                <ul style="margin-left: 1.5rem; color: var(--text-muted); line-height: 1.8;">
+                    <li><strong style="color:var(--text-main)">Context Gathering:</strong> Google Search via the Serper API simulates a developer searching for API documentation and developer portals.</li>
+                    <li><strong style="color:var(--text-main)">Web Scraping:</strong> Jina Reader API visits the top URLs and bypasses JavaScript-heavy SPAs to return clean, LLM-optimized Markdown text.</li>
+                    <li><strong style="color:var(--text-main)">Structured Extraction:</strong> Groq, Gemini 2.5, and Sarvam APIs read the documentation and extract structured JSON utilizing zero-shot prompting techniques.</li>
+                    <li><strong style="color:var(--text-main)">Validation Loops:</strong> The <code>instructor</code> Python library enforces strict Pydantic JSON schemas, forcing the LLM to retry on validation failures.</li>
+                    <li><strong style="color:var(--text-main)">Macro-Analysis:</strong> A dedicated Analyzer Agent processes the entire dataset to perform clustering, identifying the structural patterns presented above.</li>
+                </ul>
+
+                <h3 style="margin-top: 2rem; font-size: 1.2rem;">Where a Human Was Needed:</h3>
+                <ul style="margin-left: 1.5rem; color: var(--text-muted); line-height: 1.8;">
+                    <li><strong style="color:var(--text-main)">Pipeline Architecture:</strong> A human wrote the Python pipeline (using standard async/await patterns) and tuned the Pydantic schemas.</li>
+                    <li><strong style="color:var(--text-main)">Rate Limit Handling:</strong> Due to free-tier API quotas on Groq and Gemini, human intervention was required to swap out LLM keys and adjust model endpoints (migrating from Groq to Gemini to Sarvam 105b mid-flight).</li>
+                    <li><strong style="color:var(--text-main)">Deduplication:</strong> A human manually noticed minor dataset duplications in the checkpointing logic and wrote a one-off Python script to clean the final JSON output.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 4. The Proof -->
+        <section id="the-proof" style="margin-top: 4rem;">
+            <h2>4. The Proof (Run it yourself)</h2>
+            <div class="glass-card">
+                <p class="text-lead">The entire pipeline is open-source and runnable locally via a single command line interface. It is robust to failures, saving state incrementally.</p>
+                
+                <div class="proof-block">
+                    $ git clone &lt;repo-url&gt;<br>
+                    $ cd composio<br>
+                    $ uv sync<br>
+                    $ uv run python main.py all
+                </div>
+                <p class="text-muted"><em>Running this will sequentially spin up the Researcher, Verifier, Analyzer, and Dashboard Generator.</em></p>
+            </div>
+        </section>
+
+        <!-- 5. Verification -->
+        <section id="verification" style="margin-top: 4rem;">
+            <h2>5. Verification & Accuracy Checks</h2>
+            <div class="glass-card">
+                <p class="text-lead" style="margin-bottom: 1.5rem;">To ensure the data is trustworthy, a dedicated <strong>Verification Agent</strong> was spawned to sample 20% of the dataset and independently audit the Researcher Agent's claims against the raw documentation URLs.</p>
+                
+                <h3 style="font-size: 1.2rem; margin-top: 2rem;">The Accuracy Jump: Static vs Agentic</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                    <div style="background: var(--bg); padding: 1.5rem; border: 1px solid var(--error); border-radius: 8px;">
+                        <h4 style="margin-top: 0; font-size: 1.1rem; color: var(--error);">Phase 1: Static Verification</h4>
+                        <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 1rem;">Blindly reading top 3 marketing URLs.</p>
+                        <ul style="margin-left: 1.5rem; color: var(--text-muted);">
+                            <li>Primary Auth Accuracy: <strong>25.0%</strong></li>
+                            <li>Buildability Accuracy: <strong>31.6%</strong></li>
+                        </ul>
+                    </div>
+                    <div style="background: var(--bg); padding: 1.5rem; border: 1px solid var(--success); border-radius: 8px;">
+                        <h4 style="margin-top: 0; font-size: 1.1rem; color: var(--success);">Phase 2: Agentic ReAct Loop</h4>
+                        <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 1rem;">Iterative web searching & deep-link scraping.</p>
+                        <ul style="margin-left: 1.5rem; color: var(--text-muted);">
+                            <li>Primary Auth Accuracy: <strong style="color: var(--success); font-size: 1.1rem;">71.4%</strong></li>
+                            <li>Buildability Accuracy: <strong style="color: var(--success); font-size: 1.1rem;">66.7%</strong></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3 style="font-size: 1.2rem; margin-top: 2rem;">How We Improved It: The Agent Loop</h3>
+                <p class="text-muted">
+                    The Phase 1 accuracy was unacceptably low due to <strong>Context Starvation</strong>. The initial script fetched the top 3 Google URLs, which were often high-level pricing pages rather than deep API references, forcing the LLM to hallucinate. 
+                    <br><br>
+                    To solve this, we rewrote the Verifier into a true <strong>Autonomous Agent</strong> using the ReAct (Reasoning & Acting) pattern. We armed the LLM with Python tools to <code>search_web</code> and <code>scrape_url</code>. Instead of a single-shot guess, the Agent now thinks: <em>"I need the auth method. Let me search Google for 'App Developer API Auth'. Now let me click result #2. Ah, this page says API keys are used. I will stop."</em> By allowing the agent to dynamically navigate the docs up to 5 times per app, accuracy skyrocketed past 70%.
+                </p>
+
+                <h3 style="font-size: 1.2rem; margin-top: 2rem;">Honest Hits & Misses:</h3>
+                
+                <div style="margin-top: 1rem; border-left: 4px solid var(--success); padding-left: 1rem; margin-bottom: 1.5rem;">
+                    <strong>HIT (Fathom):</strong> The Agent successfully read the Quickstart guide and extracted "API Key" as the primary auth. The Verifier cross-checked the text: <em>"Generate an API key and make your first call in minutes."</em> and validated the claim as True.
+                </div>
+
+                <div style="margin-top: 1rem; border-left: 4px solid var(--error); padding-left: 1rem; margin-bottom: 1.5rem;">
+                    <strong>MISS (Linear):</strong> The Researcher claimed Linear's Buildability was "Ready". The Verifier read the documentation and found absolutely no mention of the word "Buildability" or its status. The Verifier correctly marked the claim as <em>False / Unsupported</em> because the LLM made a logical leap rather than strictly extracting data.
+                </div>
+
+                <div style="margin-top: 1rem; border-left: 4px solid var(--error); padding-left: 1rem; margin-bottom: 2rem;">
+                    <strong>MISS (YouTube Transcript API):</strong> The Researcher claimed the Primary Auth was an "API Key". The Verifier read the PyPI documentation, found no mention of authentication, saw code examples initiating the client with no credentials, and accurately debunked the hallucination.
+                </div>
+
+                <h3 style="font-size: 1.2rem; margin-top: 2rem;">The Path to 99%</h3>
+                <p class="text-muted">
+                    While the Agentic Loop fixed context starvation, the remaining ~30% gap is caused by modern web architecture (React SPAs, cookie walls, and JS-rendered API Explorers) blocking standard HTTP GET requests. The final evolution to reach 99% accuracy requires swapping our HTTP scraper with a <strong>Browser-Use / Playwright Agent</strong> that can physically execute JavaScript and click through consent banners just like a human developer.
+                </p>
+            </div>
+        </section>
+
+        <footer>
+            <p>Generated on 2026-07-09 05:36:43 UTC • Built for Composio Product Ops Task</p>
+        </footer>
+    </div>
+
+    <!-- Data Injection via Jinja2 -->
+    <script id="resultsData" type="application/json">
+        [
+  {
+    "app_name": "Salesforce",
+    "category": "CRM and Sales",
+    "one_liner": "Salesforce is a customer relationship management platform that provides a range of tools and services for sales, marketing, and customer service teams.",
+    "auth_methods": [
+      "OAuth2",
+      "API Key"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Self-serve (Free Trial)",
+    "api_type": "REST + GraphQL",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": true,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/hosted-mcp-servers-overview.html",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developer.salesforce.com/docs",
+      "https://developer.salesforce.com/developer-centers/integration-apis"
+    ],
+    "confidence": "High",
+    "notes": "Salesforce provides a range of APIs and tools for developers, including REST and GraphQL APIs, and supports OAuth2 and API Key authentication."
+  },
+  {
+    "app_name": "HubSpot",
+    "category": "CRM and Sales",
+    "one_liner": "HubSpot is an all-in-one CRM and sales platform",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Developer account required",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://developers.hubspot.com/ai-tools/mcp",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developers.hubspot.com/docs",
+      "https://developers.hubspot.com/docs/developer-tooling/overview",
+      "https://developers.hubspot.com/docs/guides/crm/understanding-the-crm"
+    ],
+    "confidence": "High",
+    "notes": "HubSpot has a well-documented API with a wide range of endpoints and supports OAuth2 for authentication."
+  },
+  {
+    "app_name": "Pipedrive",
+    "category": "CRM and Sales",
+    "one_liner": "Pipedrive is a Web-based Sales CRM.",
+    "auth_methods": [
+      "API Key",
+      "OAuth2"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free)",
+    "access_detail": "Free API access with every plan, API token can be obtained manually from the Pipedrive app",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://devcommunity.pipedrive.com/t/pipedrive-mcp-server/20195",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developers.pipedrive.com/docs/api/v1",
+      "https://www.pipedrive.com/en/features/crm-api"
+    ],
+    "confidence": "High",
+    "notes": "Pipedrive has a wide range of API endpoints and a well-documented API reference, making it easy to integrate and build custom applications."
+  },
+  {
+    "app_name": "Attio",
+    "category": "CRM and Sales",
+    "one_liner": "Attio is a revolutionary CRM platform which is highly customisable, incredibly powerful and data-driven.",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Self-serve access with OAuth 2.0",
+    "api_type": "REST + GraphQL",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "Attio MCP server is available for AI clients",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://docs.attio.com/docs/overview",
+      "https://attio.com/platform/developers",
+      "https://docs.attio.com/rest-api/endpoint-reference/openapi"
+    ],
+    "confidence": "High",
+    "notes": "Attio provides a public OpenAPI specification for its REST API"
+  },
+  {
+    "app_name": "Twenty",
+    "category": "CRM and Sales",
+    "one_liner": "Twenty is an open-source CRM providing REST and GraphQL APIs for customizability and extensibility.",
+    "auth_methods": [
+      "API Key",
+      "OAuth2"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Self-serve access with API key creation and OAuth-based access for external apps.",
+    "api_type": "REST + GraphQL",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": true,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://github.com/mhenry3164/twenty-crm-mcp-server",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://docs.twenty.com/developers/extend/api",
+      "https://docs.twenty.com/developers/introduction"
+    ],
+    "confidence": "High",
+    "notes": "Twenty provides extensive documentation and has a self-hosted option, but its open-source nature and customizability make it an attractive target for AI agent integration."
+  },
+  {
+    "app_name": "Podio",
+    "category": "Documents & Productivity",
+    "one_liner": "Podio is an online work platform to manage, share, and get work done smarter together with tools that work like you.",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Free tier with limited requests, paid plans for more requests",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "https://docs.sharefile.com/en-us/podio/using-podio/general-features/podio-mcp-server.html",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developers.podio.com/",
+      "https://public-api.org/api/428/podio"
+    ],
+    "confidence": "High",
+    "notes": null
+  },
+  {
+    "app_name": "Zoho CRM",
+    "category": "CRM and Sales",
+    "one_liner": "Comprehensive CRM platform for customer-facing teams",
+    "auth_methods": [
+      "OAuth2",
+      "API Key"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free)",
+    "access_detail": "Self-serve with free plan and paid upgrades",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": true,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "https://www.zoho.com/mcp/",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://www.zoho.com/crm/developer/docs/api/v8/",
+      "https://www.zoho.com/developer/rest-api.html",
+      "https://www.zoho.com/crm/developer/docs/"
+    ],
+    "confidence": "High",
+    "notes": null
+  },
+  {
+    "app_name": "Close",
+    "category": "CRM and Sales",
+    "one_liner": "Close is a sales automation platform that provides a range of tools and features to help businesses manage their sales processes.",
+    "auth_methods": [
+      "OAuth2",
+      "API Key"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Free tier with limited features, paid plans available",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "MCP server available for AI agents",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developer.close.com/",
+      "https://developer.close.com/api/resources/leads"
+    ],
+    "confidence": "High",
+    "notes": null
+  },
+  {
+    "app_name": "Copper",
+    "category": "CRM and Sales",
+    "one_liner": "Copper is a Google-recommended CRM for managing leads, people, companies, opportunities, and projects.",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Self-serve with OAuth2.0 authorization",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://mcp.pipedream.com/app/copper",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developer.copper.com/",
+      "https://developer.copper.com/introduction/oauth/flow.html"
+    ],
+    "confidence": "High",
+    "notes": null
+  },
+  {
+    "app_name": "Zendesk",
+    "category": "Customer Service",
+    "one_liner": "Zendesk is a customer service platform that provides a range of tools for managing customer interactions.",
+    "auth_methods": [
+      "OAuth2",
+      "API Key"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Offers a free trial with access to most features, with some limitations on the number of users and requests per day.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "An MCP server exists for this app.",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developer.zendesk.com/api-reference/",
+      "https://developer.zendesk.com/documentation/"
+    ],
+    "confidence": "High",
+    "notes": "The API documentation is well-organized and easy to follow, with clear examples and code snippets. The API itself is robust and well-maintained, with a wide range of endpoints for managing customer interactions."
+  },
+  {
+    "app_name": "Intercom",
+    "category": "CRM and Sales",
+    "one_liner": "Intercom is a customer messaging platform that enables businesses to build personalized customer experiences.",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free)",
+    "access_detail": "Self-serve access with a free development workspace",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://developers.intercom.com/docs/guides/mcp",
+    "existing_composio_integration": false,
+    "buildability": "Feasible",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developers.intercom.com/docs",
+      "https://developers.intercom.com/docs/references/rest-api/api.intercom.io"
+    ],
+    "confidence": "High",
+    "notes": null
+  },
+  {
+    "app_name": "Freshdesk",
+    "category": "Customer Support",
+    "one_liner": "Freshdesk is a customer support software that provides a platform for businesses to manage their customer inquiries and issues.",
+    "auth_methods": [
+      "Basic Auth",
+      "API Key"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Free trial available, paid plans start at $15/agent/month",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "MCP server exists for this app",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developers.freshdesk.com/",
+      "https://developer.freshdesk.com/api/v1",
+      "https://developers.freshworks.com/docs/app-sdk/v3.0/support_ticket/rest-apis/"
+    ],
+    "confidence": "High",
+    "notes": null
+  },
+  {
+    "app_name": "Help Scout",
+    "category": "Customer Support",
+    "one_liner": "Help Scout is a customer support platform that provides tools for developers to create custom integrations and applications.",
+    "auth_methods": [
+      "API Key",
+      "OAuth2"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "API access is available on paid plans, with different levels of access depending on the plan.",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://github.com/drewburchfield/help-scout-mcp-server",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developer.helpscout.com/",
+      "https://docs.helpscout.com/article/1141-docs-api",
+      "https://docs.helpscout.com/article/1140-mailbox-api"
+    ],
+    "confidence": "High",
+    "notes": null
+  },
+  {
+    "app_name": "Gorgias",
+    "category": "Customer Support",
+    "one_liner": "Gorgias is a helpdesk platform for e-commerce businesses",
+    "auth_methods": [
+      "Basic Auth",
+      "API Key"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Access to REST API credentials is available on all Helpdesk plans",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://docs.gorgias.com/en-US/connect-your-ai-assistant-to-the-gorgias-mcp-6310546",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developers.gorgias.com/",
+      "https://docs.gorgias.com/en-US/rest-api-208286",
+      "https://docs.gorgias.com/en-US/articles/developer-resources-18370"
+    ],
+    "confidence": "High",
+    "notes": null
+  },
+  {
+    "app_name": "DealCloud",
+    "category": "CRM and Sales",
+    "one_liner": "DealCloud provides an API for managing deal-related data, schema, user accounts, and real-time events within its platform.",
+    "auth_methods": [
+      "API Key",
+      "Bearer Token"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Partner/Contact-Sales Gated",
+    "access_detail": "The documentation mentions an 'Authorization Token' and 'API Keys'. However, the 'DealCloud MCP Server' is in 'client preview starting July 2026', implying broader public access or self-serve is not yet available for key integration methods.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "Client preview starting July 2026.",
+    "existing_composio_integration": false,
+    "buildability": "Gated",
+    "main_blocker": "The primary integration method (MCP server) is in client preview, with general availability indicated for July 2026, implying restricted access for general development.",
+    "evidence_urls": [
+      "https://api.docs.dealcloud.com/docs",
+      "https://api.docs.dealcloud.com/",
+      "https://api.docs.dealcloud.com/docs/data",
+      "https://www.intapp.com/mcp-documentation/"
+    ],
+    "confidence": "High",
+    "notes": "The API documentation is well-structured and comprehensive, covering schema, data manipulation, user management, and more. While 'API Keys' and 'Authorization Token' are mentioned, the 'client preview' status of the MCP server suggests a controlled access model rather than a fully self-serve public API for direct integrations at this time."
+  },
+  {
+    "app_name": "Front",
+    "category": "Unknown",
+    "one_liner": "Front provides APIs for integrating custom solutions, synchronizing data, automating workflows, and managing customer communications, allowing AI agents to interact with conversations.",
+    "auth_methods": [
+      "OAuth2",
+      "API Key"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free)",
+    "access_detail": "Free developer environment available with a unique email signup, limited to 3 teammates. Separate production accounts are for company use.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "Front offers an MCP Server to access Front data and actions through the MCP protocol, allowing AI agents like Claude and ChatGPT to read and reply to conversations and other Front resources.",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://dev.frontapp.com/docs/welcome",
+      "https://dev.frontapp.com/docs/core-api-overview",
+      "https://dev.frontapp.com/reference/introduction",
+      "https://dev.frontapp.com/docs/authentication",
+      "https://dev.frontapp.com/docs/oauth",
+      "https://dev.frontapp.com/docs/create-and-revoke-api-tokens",
+      "https://community.front.com/api-news-updates-40/the-front-mcp-server-is-here-beta-3712"
+    ],
+    "confidence": "High",
+    "notes": "While the category was listed as 'Unknown' in the prompt, Front is a customer communication platform, often used as a helpdesk or shared inbox."
+  },
+  {
+    "app_name": "Pylon",
+    "category": "Customer Service Management",
+    "one_liner": "A platform for programmatic access to read and write customer support data and automate business processes.",
+    "auth_methods": [
+      "API Key"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Paid Plan Required)",
+    "access_detail": "Admin users can create API tokens via API Settings in Team Settings. Usage of API itself does not incur additional charges.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "Pylon MCP integration documented at https://docs.usepylon.com/pylon-docs/integrations/pylon-mcp",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://docs.usepylon.com/pylon-docs/developer/api",
+      "https://getpylon.com/developers/",
+      "https://docs.usepylon.com/pylon-docs/developer/api/api-reference"
+    ],
+    "confidence": "High",
+    "notes": "Access to create API tokens is available for Admin users within the Team Settings, implying a paid subscription is required to be an admin. The documentation mentions contacting support staff, which could be for initial guidance rather than blocking access."
+  },
+  {
+    "app_name": "LiveAgent",
+    "category": "Customer Support / Helpdesk",
+    "one_liner": "LiveAgent is an integrated customer support software, ticketing system, live chat, social helpdesk, and voice helpdesk solution, accessible from anywhere.",
+    "auth_methods": [
+      "API Key"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Paid Plan Required)",
+    "access_detail": "Subscription plans start from $19/month, with a 14-day free trial available.",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "https://github.com/vinkius-labs/mcp-database/blob/main/mcps/liveagent.md",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://support.liveagent.com/066804-LiveAgent-API",
+      "https://support.liveagent.com/911737-API-v3",
+      "https://support.liveagent.com/840770-Complete-API-reference"
+    ],
+    "confidence": "High",
+    "notes": "The 'Complete API reference' details API v1, listing approximately 39 endpoints across various categories. API v3 is also mentioned, with documentation and a Swagger descriptor available within a LiveAgent account, suggesting a potentially broader API surface not fully detailed in the provided static content."
+  },
+  {
+    "app_name": "Plain",
+    "category": "Unknown",
+    "one_liner": "Plain offers a GraphQL API that provides full programmatic control over its platform, mirroring all UI capabilities.",
+    "auth_methods": [
+      "API Key",
+      "Bearer Token"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Paid Plan Required)",
+    "access_detail": "Requires an API key, which likely implies a Plain account/workspace (paid plan inferred). API keys can be scoped with permissions (e.g., `customer:read`).",
+    "api_type": "GraphQL",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": true,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "https://help.plain.com/article/mcp-server",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://www.plain.com/docs/graphql/introduction"
+    ],
+    "confidence": "High",
+    "notes": "The breadth is inferred as 'Broad' because the documentation explicitly states there are 'no limitations in what can be done via the API vs the UI' and encourages exploring the schema beyond documented examples. Access level is inferred as 'Paid Plan Required' as it's a business service with 'workspaces' and an API key, typical for SaaS."
+  },
+  {
+    "app_name": "Gladly",
+    "category": "Unknown",
+    "one_liner": "Gladly's API facilitates customer service conversations by providing agents with rich customer context to deliver seamless experiences.",
+    "auth_methods": [
+      "Basic Auth"
+    ],
+    "primary_auth": "Basic Auth",
+    "access_level": "Admin/Org Approval Required",
+    "access_detail": "API access requires an existing Gladly instance. An administrator must grant 'API User' permission to a user, who can then create API tokens for Basic Authentication. It is recommended to create a dedicated user for API calls.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://community.gladysassistant.com/t/agent-ia-serveur-mcp/9656?tl=en",
+    "existing_composio_integration": false,
+    "buildability": "Feasible",
+    "main_blocker": "Requires an existing Gladly organization and administrative setup (granting 'API User' permissions) to obtain API tokens.",
+    "evidence_urls": [
+      "https://developer.gladly.com/rest/",
+      "https://developer.gladly.com/",
+      "https://github.com/gladly/rest-api-examples"
+    ],
+    "confidence": "High",
+    "notes": "The Public Answers API specifically notes that it can be used without an API token, as it only provides access to public content. All other APIs mentioned require Basic Auth with an API token."
+  },
+  {
+    "app_name": "Slack",
+    "category": "Communication",
+    "one_liner": "The Slack API enables developers to build interactive apps and automate workflows, turning Slack into a powerful platform for daily work.",
+    "auth_methods": [
+      "OAuth2",
+      "Bearer Token"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free)",
+    "access_detail": "Developer access to the API and creation of Slack apps is self-serve. Using Slack in a workspace may require a paid plan.",
+    "api_type": "REST + GraphQL",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "A guide to Model Context Protocol in Slack exists.",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://docs.slack.dev/",
+      "https://api.slack.com/apps/",
+      "https://docs.slack.dev/apis/",
+      "https://slack.com/help/articles/48855576908307-Guide-to-Model-Context-Protocol-in-Slack"
+    ],
+    "confidence": "High",
+    "notes": "The primary authentication method is inferred as OAuth2 given the `slack login` command for app authentication and the concept of granting permissions to apps. Bearer tokens are typically the mechanism used with OAuth2 access tokens or API Keys. The API explicitly states 'Web API supplies a collection of HTTP methods' with 'over 100 methods available'. While WebSockets are mentioned for the Events API (via Socket Mode) and Legacy RTM API, the core API is REST. GraphQL is not explicitly mentioned as an API type. The prompt provided the information about the existing MCP server."
+  },
+  {
+    "app_name": "Twilio",
+    "category": "Communications Platform",
+    "one_liner": "Twilio APIs provide flexibility, global reach, and reliable deliverability to connect with customers anywhere, offering a platform to connect communication channels, customer context, and AI.",
+    "auth_methods": [
+      "API Key",
+      "Basic Auth"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Typically a free trial period or free tier with usage limits, then paid plans. Full details on specific limits not provided in this text.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://www.twilio.com/docs/ai/mcp",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://www.twilio.com/docs",
+      "https://www.twilio.com/en-us/developers",
+      "https://www.twilio.com/en-us/blog/developers"
+    ],
+    "confidence": "High",
+    "notes": "The documentation mentions 'API Reference' and 'Twilio APIs' extensively, confirming REST API usage. Specific API authentication methods (e.g., API Key, Basic Auth) were inferred based on common Twilio practice, as explicit details were not in the provided text, though 'Authentication' products are mentioned."
+  },
+  {
+    "app_name": "Zoho Cliq",
+    "category": "Communication and Collaboration",
+    "one_liner": "Zoho Cliq's REST API enables seamless communication between your applications and Zoho Cliq, offering rich chats, message operations, and platform component development.",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Paid Plan Required)",
+    "access_detail": "Access to the API is likely tied to a Zoho Cliq subscription, which typically requires a paid plan after a potential trial.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://www.zoho.com/cliq/help/platform/zoho-cliq-mcp.html",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://www.zoho.com/cliq/help/restapi/v3/introduction/",
+      "https://www.zoho.com/cliq/help/platform/getting-started-with-cliq-platform.html",
+      "https://www.zoho.com/cliq/help/developers.html"
+    ],
+    "confidence": "High",
+    "notes": "The access level is inferred as 'Self-serve (Paid Plan Required)' as Zoho Cliq is a business collaboration tool and often requires a paid subscription for full features, including developer access. The documentation explicitly mentions the availability of an OpenAPI document and outlines extensive API capabilities (chat, messages, bots, slash commands, widgets, schedulers, settings) which suggests a broad API surface."
+  },
+  {
+    "app_name": "Lark (Larksuite)",
+    "category": "Workplace Collaboration",
+    "one_liner": "An open, swift, and accessible way to reshape workplace experiences through custom apps and integrations.",
+    "auth_methods": [
+      "OAuth2",
+      "API Key"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free)",
+    "access_detail": "Developers can create apps and access the Developer Console directly.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "Lark provides an MCP server, as indicated by the document 'Call Feishu MCP server in remote mode'.",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://open.larksuite.com/document/uYjL24iN/uADOy4CM4IjLwgjM",
+      "https://open.larksuite.com/",
+      "https://open.larksuite.com/document/ukTMukTMukTM/ugzNzUjL4czM14CO3MTN/guide/getting-start"
+    ],
+    "confidence": "High",
+    "notes": "Lark explicitly promotes itself as a platform for AI agents, offering 'Lark CLI, Now Open Source' to 'Bring any AI agent to Lark' and mentioning an 'Official Lark Plugin for OpenClaw'. The platform boasts over 2500 APIs covering various functionalities like contacts, messenger, docs, calendar, and approvals. Developer Console and 'CREATE APP' links imply self-serve access for app development."
+  },
+  {
+    "app_name": "Pumble",
+    "category": "Team Communication",
+    "one_liner": "Pumble is a team communication platform offering messaging, calls, and integrations, with an API accessible via API keys for direct interaction and OAuth2 for custom bot applications.",
+    "auth_methods": [
+      "API Key",
+      "OAuth2"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free)",
+    "access_detail": "API addon available on all plans. Rate limit up to 1000 requests per minute per user. Custom apps require installation and user authorization (OAuth2).",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "https://pumble.com/help/integrations/automation-workflow-integrations/how-to-use-the-pumble-mcp-server/",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://pumble.com/help/integrations/automation-workflow-integrations/api-keys-integration/",
+      "https://pumble.com/integrations",
+      "https://dev-docs.marketplace.cake.com/pumble/learn/introduction.html"
+    ],
+    "confidence": "High",
+    "notes": "Pumble offers two main ways to interact via API: direct API key usage for simple HTTP requests (documented with a Swagger link not directly accessible in the provided text), and a more comprehensive developer platform for building custom apps/bots using an OAuth2 flow and an SDK/ApiClient. The listed API key capabilities (sending, replying, deleting messages, adding reactions, channel creation, listing messages/channels/DMs) indicate a moderate breadth, with the full list in the Swagger documentation."
+  },
+  {
+    "app_name": "Discord",
+    "category": "Social / Communication",
+    "one_liner": "Build bots and integrations on Discord, or connect your game with rich presence, voice chat, and more.",
+    "auth_methods": [
+      "API Key",
+      "OAuth2"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free)",
+    "access_detail": "Developers can manage apps through the Discord Developer Portal. Basic API access appears to be self-serve.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://github.com/v-3/discordmcp",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://docs.discord.com/developers/reference",
+      "https://docs.discord.com/developers/intro",
+      "https://github.com/discord/discord-api-docs"
+    ],
+    "confidence": "High",
+    "notes": "Discord provides both an HTTP (REST) API and a Gateway (WebSocket) API for real-time events. Authentication can be done using a Bot Token (API Key) or an OAuth2 Bearer Token. Both are prominently supported for different use cases."
+  },
+  {
+    "app_name": "Telegram",
+    "category": "Communication",
+    "one_liner": "Offers APIs for building custom Telegram bots, clients, and sending verification codes, primarily a messaging application.",
+    "auth_methods": [
+      "API Key",
+      "Custom/Proprietary"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free)",
+    "access_detail": "Bot API and Telegram API/TDLib are free of charge. Gateway API is free to test.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://github.com/chigwell/telegram-mcp",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://core.telegram.org/",
+      "https://core.telegram.org/bots/api",
+      "https://github.com/tdlib/telegram-bot-api"
+    ],
+    "confidence": "High",
+    "notes": "Telegram offers multiple APIs: Bot API (HTTP-based REST for bots, uses API tokens), Telegram API (for building custom clients using their MTProto protocol, often via TDLib library, involves user auth like phone registration, 2FA, QR login, Passkeys), and Gateway API (for sending verification codes). The Bot API is straightforward for AI agent integration with its HTTP/REST interface and token-based authentication, making it 'Ready'. The client API is more complex due to its custom protocol and focus on client development."
+  },
+  {
+    "app_name": "WhatsApp Business",
+    "category": "Communication / Business Messaging",
+    "one_liner": "Allows businesses to build, automate, and integrate messaging experiences on WhatsApp, sending engaging, timely, high-quality messages to customers.",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Free access to test numbers, code samples, webhooks, and a sandbox for testing and development. Pricing details are available for actual usage beyond testing.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://github.com/lharries/whatsapp-mcp",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://whatsappbusiness.com/developers/developer-hub/",
+      "https://developers.facebook.com/documentation/business-messaging/whatsapp/overview"
+    ],
+    "confidence": "High",
+    "notes": "The provided Reddit URL returned a 403 Forbidden error, so its content was not included in the analysis. Authentication method inferred as OAuth2 due to explicit mention of 'Access tokens' and being a 'Platform hosted by Meta'."
+  },
+  {
+    "app_name": "Aircall",
+    "category": "Voice/Call Center",
+    "one_liner": "Aircall provides a next-gen business phone system and call center software, empowering developers to integrate phone workflows and build apps through its Public API and webhooks.",
+    "auth_methods": [
+      "OAuth2",
+      "Basic Auth"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Partner/Contact-Sales Gated",
+    "access_detail": "OAuth client_id and client_secret for Technology Partners are obtained by filling a form; Aircall reviews and gets back to applicants. Basic Auth is available for existing Aircall customers building for their own account.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://mcp.pipedream.com/app/aircall",
+    "existing_composio_integration": false,
+    "buildability": "Gated",
+    "main_blocker": "Obtaining OAuth credentials for Technology Partners requires a manual application and approval process with Aircall.",
+    "evidence_urls": [
+      "https://developer.aircall.io/api-references",
+      "https://developer.aircall.io/",
+      "https://aircall.io/call-center-software-features/webhooks-api/"
+    ],
+    "confidence": "High",
+    "notes": "The primary authentication for building integrations for multiple companies (Technology Partners) is OAuth2, which involves an application process for credentials. Basic Auth is available for existing customers building for their own account."
+  },
+  {
+    "app_name": "Vonage",
+    "category": "Communication & Network APIs",
+    "one_liner": "Provides communication APIs for voice, video, messaging, and network features.",
+    "auth_methods": [
+      "API Key"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Free trial available upon sign-up, with links to pricing for paid plans.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "https://developer.vonage.com/en/mcp-server/overview",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developer.vonage.com/en/documentation",
+      "https://developer.vonage.com/en/home",
+      "https://www.vonage.com/developer-center/"
+    ],
+    "confidence": "High",
+    "notes": "The provided documentation snippets do not explicitly detail the authentication methods. However, the presence of an 'API Dashboard' and 'Sign-up' for a developer platform strongly implies a standard API Key-based authentication mechanism. This is an inference based on common practice for such services."
+  },
+  {
+    "app_name": "Google Ads",
+    "category": "Unknown",
+    "one_liner": "Google Ads API for managing advertising campaigns and account data programmatically.",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Typically, Google APIs are self-serve, requiring a Google Cloud Project and enabling the API. Usage might incur costs beyond a free tier.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Poor",
+    "existing_mcp": true,
+    "mcp_detail": "found at: https://developers.google.com/google-ads/api/docs/developer-toolkit/mcp-server",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": "Documentation content was blocked by CAPTCHA during scraping, making direct analysis difficult.",
+    "evidence_urls": [
+      "https://developers.google.com/google-ads/api",
+      "https://developers.google.com/google-ads/api/docs/get-started/introduction",
+      "https://groups.google.com/g/adwords-api/c/DjE9RgkaXNw"
+    ],
+    "confidence": "Medium",
+    "notes": "The primary documentation URLs provided resulted in CAPTCHA pages, limiting direct analysis of API details, auth methods, and breadth. Inferred auth (OAuth2) and API type (REST) based on general Google API patterns and a forum post mentioning 'REST API'. The existence of an MCP server and general knowledge of Google's robust API ecosystem suggest 'Ready' buildability for a typical developer, despite the scraping issue."
+  },
+  {
+    "app_name": "Meta Ads",
+    "category": "Advertising",
+    "one_liner": "Programmatically create, manage, and report on Facebook and Instagram ads using Meta's Marketing API.",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Paid Plan Required)",
+    "access_detail": "Requires a Meta Developer Account, a Business Manager, and an active ad account with a valid payment method.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "Confirmed by user prompt: https://www.facebook.com/business/help/1456422242197840",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developers.facebook.com/documentation/ads-commerce/marketing-api",
+      "https://admanage.ai/blog/meta-ads-api",
+      "https://www.facebook.com/ads/library/api/",
+      "https://www.facebook.com/business/help/1456422242197840"
+    ],
+    "confidence": "High",
+    "notes": "The API is built on Meta's 'Graph API structure', which is a RESTful API that models data as a graph (nodes, edges, fields), but does not explicitly use the GraphQL query language."
+  },
+  {
+    "app_name": "LinkedIn Ads",
+    "category": "Marketing",
+    "one_liner": "Provides APIs to build solutions for LinkedIn advertising, including campaign performance analytics, audience targeting, and event promotion.",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Admin/Org Approval Required",
+    "access_detail": "Requires application and approval for 'Development tier access' through creating an app and submitting an access form. Some APIs (e.g., Event Ads, Matched Audiences, Predictive Audiences) are private and require additional approval after initial Advertising API approval.",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "https://www.linkedin.com/posts/aayildirim_we-just-built-a-custom-linkedin-ads-mcp-that-activity-7384285145173917696-06d_",
+    "existing_composio_integration": false,
+    "buildability": "Feasible",
+    "main_blocker": "Requires application and approval for API access.",
+    "evidence_urls": [
+      "https://developer.linkedin.com/product-catalog/marketing/advertising-api",
+      "https://developer.linkedin.com/product-catalog/marketing",
+      "https://learn.microsoft.com/en-us/linkedin/"
+    ],
+    "confidence": "High",
+    "notes": "Authentication method (OAuth2) is inferred from the 'Create an app' and 'Get API Access' flow commonly associated with LinkedIn APIs. The documentation refers to 'API' multiple times and provides links to specific API functionalities (e.g., Ad Analytics API, Event Ads API), implying a RESTful architecture."
+  },
+  {
+    "app_name": "Mailchimp",
+    "category": "Marketing Automation",
+    "one_liner": "Mailchimp is an all-in-one integrated marketing platform for small businesses, offering APIs for marketing campaigns, transactional emails, and an open-source e-commerce stack.",
+    "auth_methods": [
+      "OAuth2",
+      "API Key"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Risk-free 14-day trial, no credit card required to start. Offers various paid plans.",
+    "api_type": "REST + GraphQL",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": true,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "Mailchimp Transactional Messaging MCP",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://mailchimp.com/developer/",
+      "https://mailchimp.com/help/about-api-keys/",
+      "https://apitracker.io/a/mailchimp"
+    ],
+    "confidence": "High",
+    "notes": "Mailchimp offers distinct APIs for Marketing (REST), Transactional (REST/SMTP), and Open Commerce (GraphQL). The Marketing API provides a Swagger specification indicating a broad surface. OAuth2 is documented for accessing user data, and API Keys are also explicitly mentioned as an authentication method."
+  },
+  {
+    "app_name": "GoHighLevel",
+    "category": "CRM and Sales",
+    "one_liner": "A comprehensive platform for building integrations, automations, and custom applications with the HighLevel CRM and Marketplace",
+    "auth_methods": [
+      "OAuth2",
+      "API Key"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Basic API access is included with Starter and Unlimited plans, while Advanced API access is available on the Agency Pro plan",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://marketplace.gohighlevel.com/docs/other/mcp/",
+    "existing_composio_integration": false,
+    "buildability": "Feasible",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://help.gohighlevel.com/support/solutions/articles/48001060529-highlevel-api-documentation",
+      "https://developers.gohighlevel.com/",
+      "https://marketplace.gohighlevel.com/docs/"
+    ],
+    "confidence": "High",
+    "notes": null
+  },
+  {
+    "app_name": "Klaviyo",
+    "category": "Marketing Automation",
+    "one_liner": "Klaviyo is a marketing automation platform that helps businesses grow by creating personalized customer experiences.",
+    "auth_methods": [
+      "API Key",
+      "OAuth2"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free)",
+    "access_detail": "Free tier with limited requests per day, paid plans available",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "MCP server exists for Klaviyo, details at https://developers.klaviyo.com/en/docs/klaviyo_mcp_server",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developers.klaviyo.com/en/reference/api_overview",
+      "https://developers.klaviyo.com/en/reference/profiles_api_overview"
+    ],
+    "confidence": "High",
+    "notes": "Klaviyo has a wide range of APIs and a well-documented developer portal, making it easy to integrate with."
+  },
+  {
+    "app_name": "systeme.io",
+    "category": "Marketing Automation",
+    "one_liner": "Systeme.io is an all-in-one marketing platform that offers features like funnel building, email marketing, and automation.",
+    "auth_methods": [
+      "API Key"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Self-serve access with a free trial, paid plans required for full access",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "https://help.systeme.io/article/9489-how-to-use-systeme-ios-mcp",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://help.systeme.io/article/2329-how-to-use-systeme-io-public-api",
+      "https://help.systeme.io/article/2323-how-to-create-a-public-api-key-on-systeme-io",
+      "https://developer.systeme.io/reference/api"
+    ],
+    "confidence": "High",
+    "notes": null
+  },
+  {
+    "app_name": "Threads (Meta)",
+    "category": "Social Media",
+    "one_liner": "A platform to create and publish content on Threads",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Free tier with rate limits (e.g., 4800 * Number of Impressions)",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://github.com/quinnjr/threads-mcp",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developers.facebook.com/documentation/threads",
+      "https://developers.facebook.com/documentation/threads/overview"
+    ],
+    "confidence": "High",
+    "notes": "Rate limits apply (e.g., 250 API-published posts within a 24-hour moving period)"
+  },
+  {
+    "app_name": "SendGrid",
+    "category": "Email Service",
+    "one_liner": "SendGrid is a cloud-based email service that enables businesses to create, send, and manage emails at scale through RESTful APIs or SMTP relay.",
+    "auth_methods": [
+      "API Key",
+      "OAuth2"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Self-serve with a free trial to send 100 emails per day for 60 days then upgrade to a paid plan",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://www.twilio.com/en-us/blog/developers/community/build-a-sendgrid-mcp-server-for-ai-email-workflows",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://www.twilio.com/docs/sendgrid/for-developers",
+      "https://www.twilio.com/docs/sendgrid/api-reference",
+      "https://www.twilio.com/en-us/products/email-api/explore-ai"
+    ],
+    "confidence": "High",
+    "notes": "SendGrid has a comprehensive API documentation, a free trial, and a wide range of features to improve email deliverability and performance."
+  },
+  {
+    "app_name": "Shopify",
+    "category": "Ecommerce",
+    "one_liner": "Shopify is a comprehensive ecommerce platform that enables businesses to design, set up, and manage their stores across various sales channels.",
+    "auth_methods": [
+      "OAuth2",
+      "API Key"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Self-serve access with a free trial",
+    "api_type": "REST + GraphQL",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": true,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "MCP server exists for Shopify",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://shopify.dev/docs/api",
+      "https://shopify.dev/docs",
+      "https://www.shopifyacademy.com/article-introduction-to-shopifys-development-resources"
+    ],
+    "confidence": "High",
+    "notes": null
+  },
+  {
+    "app_name": "WooCommerce",
+    "category": "Ecommerce",
+    "one_liner": "A customizable, open-source eCommerce platform built on WordPress.",
+    "auth_methods": [
+      "OAuth2",
+      "API Key",
+      "Basic Auth"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free)",
+    "access_detail": "Public API with self-serve access, free tier available",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "Details about existing MCP server: https://developer.woocommerce.com/docs/features/mcp/",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://woocommerce.com/document/woocommerce-rest-api/",
+      "https://developer.woocommerce.com/docs/apis/rest-api/"
+    ],
+    "confidence": "High",
+    "notes": "WooCommerce has a well-documented REST API with a wide range of endpoints, making it easily accessible for integration."
+  },
+  {
+    "app_name": "BigCommerce",
+    "category": "Ecommerce",
+    "one_liner": "A platform for creating online stores and managing ecommerce operations",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free)",
+    "access_detail": "Self-serve access with multiple API account types (store-level, app-level, account-level)",
+    "api_type": "REST + GraphQL",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": true,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://www.bigcommerce.com/blog/model-context-protocol/",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://docs.bigcommerce.com/",
+      "https://docs.bigcommerce.com/developer/api-reference/about-our-apis",
+      "https://docs.bigcommerce.com/developer/docs/overview/api-fundamentals/api-accounts"
+    ],
+    "confidence": "High",
+    "notes": "Multiple API account types (store-level, app-level, account-level) with different use cases and OAuth scopes"
+  },
+  {
+    "app_name": "Salesforce Commerce Cloud",
+    "category": "Ecommerce",
+    "one_liner": "Salesforce Commerce Cloud is a cloud-based ecommerce platform for businesses.",
+    "auth_methods": [
+      "OAuth2",
+      "API Key"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Admin/Org Approval Required",
+    "access_detail": "Self-serve access is not available, requires admin approval.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "MCP server exists for this app",
+    "existing_composio_integration": false,
+    "buildability": "Feasible",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developer.salesforce.com/developer-centers/commerce-cloud",
+      "https://developer.salesforce.com/docs/commerce/commerce-api/overview",
+      "https://developer.salesforce.com/docs/commerce/commerce-api/references"
+    ],
+    "confidence": "High",
+    "notes": "Documentation is extensive but some endpoints require special access."
+  },
+  {
+    "app_name": "Magento (Adobe Commerce)",
+    "category": "Ecommerce",
+    "one_liner": "Adobe Commerce is a comprehensive ecommerce platform that enables businesses to create and manage online stores.",
+    "auth_methods": [
+      "OAuth2",
+      "API Key"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Free trial available, with paid plans starting at $2,400/year",
+    "api_type": "REST + GraphQL",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": true,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "MCP server exists for this app, details at: https://github.com/rafaelstz/adobe-commerce-dev-mcp",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developer.adobe.com/commerce/webapi/rest/",
+      "https://developer.adobe.com/commerce/webapi/graphql/"
+    ],
+    "confidence": "High",
+    "notes": "Public API with extensive documentation, suitable for AI agent toolkit integration."
+  },
+  {
+    "app_name": "Squarespace",
+    "category": "Unknown",
+    "one_liner": "Squarespace is a website builder and hosting platform that enables developers to create fully custom sites and integrate with 3rd party tools.",
+    "auth_methods": [
+      "API Key",
+      "OAuth2"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free)",
+    "access_detail": "Self-serve with API keys",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://developer.squareup.com/docs/mcp",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developers.squarespace.com/",
+      "https://support.squarespace.com/hc/en-us/articles/236297987-Squarespace-API-keys",
+      "https://support.squarespace.com/hc/en-us/articles/205815758-Developer-Tools"
+    ],
+    "confidence": "High",
+    "notes": "The API documentation and developer tools are well-documented and easily accessible."
+  },
+  {
+    "app_name": "Ecwid",
+    "category": "Ecommerce",
+    "one_liner": "Ecwid is an ecommerce platform that allows users to create online stores and manage their sales, products, and customers.",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Free tier with limited requests per minute, paid plans for more requests",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "https://viasocket.com/mcp/ecwid-by-lightspeed",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://docs.ecwid.com/api-reference",
+      "https://api2cart.com/ecwid-api/"
+    ],
+    "confidence": "High",
+    "notes": "The Ecwid API uses OAuth2 authentication and has rate limiting restrictions."
+  },
+  {
+    "app_name": "FanBasis",
+    "category": "Payments & Subscriptions",
+    "one_liner": "Everything you need to collect payments, manage subscriptions, reward customers, and automate your business with FanBasis.",
+    "auth_methods": [
+      "API Key",
+      "Bearer Token"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Partner/Contact-Sales Gated",
+    "access_detail": "API documentation (dev-docs.fanbasis.com) requires a password to access. Integration details from a LinkedIn post suggest a dedicated account team and implementation engineer, indicating a sales-led or partner-gated access model.",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Fair",
+    "existing_mcp": true,
+    "mcp_detail": "Zapier MCP server found at https://zapier.com/mcp/fanbasis",
+    "existing_composio_integration": false,
+    "buildability": "Gated",
+    "main_blocker": "API documentation is password-protected, and the integration process appears to be sales-led, requiring direct contact with the FanBasis team.",
+    "evidence_urls": [
+      "https://apidocs.fan/",
+      "https://dev-docs.fanbasis.com/",
+      "https://www.linkedin.com/posts/christinadodge_fanbasis-enterprise-payments-that-make-activity-7446934829348245504-bQEM"
+    ],
+    "confidence": "High",
+    "notes": "The public API reference (apidocs.fan) lists numerous endpoints but doesn't detail authentication. The dev-docs.fanbasis.com URL is password-protected, preventing direct access to authentication methods. Inferred API Key/Bearer Token based on standard REST API practices and the gated nature of the documentation."
+  },
+  {
+    "app_name": "Pinterest",
+    "category": "Unknown",
+    "one_liner": "One API to seamlessly integrate with Pinterest Securely plan content, manage ads, upload product feeds, and more.",
+    "auth_methods": [
+      "OAuth2",
+      "API Key",
+      "Bearer Token"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Admin/Org Approval Required",
+    "access_detail": "Developers must submit an application for 'Trial access' which is reviewed daily. Upon approval, an app ID and secret key are provided. Test tokens expire after 24 hours.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "Building an MCP ecosystem at Pinterest",
+    "existing_composio_integration": false,
+    "buildability": "Feasible",
+    "main_blocker": "Application review and approval process for API access.",
+    "evidence_urls": [
+      "https://developers.pinterest.com/",
+      "https://policy.pinterest.com/en/developer-guidelines",
+      "https://dev.pinterest.com/docs/getting-started/"
+    ],
+    "confidence": "High",
+    "notes": "Category was provided as 'Unknown', but based on the API use cases (content, ads, catalogs, analytics), it falls under 'Social Media' and 'Advertising/Marketing'."
+  },
+  {
+    "app_name": "Gumroad",
+    "category": "Unknown",
+    "one_liner": "Gumroad provides an API for creators to manage their products, sales, customers, and other account-related information.",
+    "auth_methods": [
+      "OAuth2",
+      "Bearer Token"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free)",
+    "access_detail": "Developers can register an OAuth application via their Gumroad advanced settings to obtain an Application ID, Secret, and generate access tokens. The 'Verify License API' endpoint does not require an OAuth application.",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "https://github.com/rmarescu/gumroad-mcp",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://app.gumroad.com/api",
+      "https://www.postman.com/api-reference-library/gumroad/overview",
+      "https://gumroad.com/help/article/280-create-application-api"
+    ],
+    "confidence": "High",
+    "notes": "The API uses an access token in requests, which can be generated manually for individual accounts or obtained through a standard OAuth 2.0 flow for third-party applications. A command-line interface (CLI) is also available that wraps the API endpoints."
+  },
+  {
+    "app_name": "Amazon Selling Partner API (SP-API)",
+    "category": "E-commerce & Retail",
+    "one_liner": "The Selling Partner API (SP-API) is a REST-based API that helps Amazon selling partners programmatically access their data on orders, shipments, payments, and much more.",
+    "auth_methods": [
+      "OAuth2",
+      "Bearer Token"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Paid Plan Required)",
+    "access_detail": "Requires an Amazon Selling Partner account, which typically involves a paid plan. Public applications also require listing in the Amazon Selling Partner Appstore.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://github.com/mattcoatsworth/AmazonSeller-mcp-server",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developer.amazonservices.com/",
+      "https://sell.amazon.com/developers",
+      "https://github.com/amzn/selling-partner-api-docs"
+    ],
+    "confidence": "High",
+    "notes": "Authentication for 'private seller applications' is described as 'self-authorized', which typically involves generating credentials akin to an API Key or using direct tokens (Bearer)."
+  },
+  {
+    "app_name": "DataForSEO",
+    "category": "SEO and Digital Marketing",
+    "one_liner": "Provides comprehensive SEO and digital marketing data solutions via API.",
+    "auth_methods": [
+      "API Key"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Paid Plan Required)",
+    "access_detail": "Free trial available, followed by a pay-per-use pricing model.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "DataForSEO MCP (Model Context Protocol) integration for AI/LLM agents.",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://docs.dataforseo.com/v3/",
+      "https://dataforseo.com/apis",
+      "https://dataforseo.com/"
+    ],
+    "confidence": "High",
+    "notes": "The exact authentication method (e.g., how the API key is passed - header, query param) is not detailed in the provided snippets, but 'API Key' is inferred based on standard practices for self-serve APIs of this nature."
+  },
+  {
+    "app_name": "SE Ranking",
+    "category": "SEO & GEO Data",
+    "one_liner": "SE Ranking provides programmatic access to SEO and GEO data for automation, bulk processing, and integration with other tools and AI assistants.",
+    "auth_methods": [
+      "API Key",
+      "Bearer Token"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Paid Plan Required)",
+    "access_detail": "API access is included in every SE Ranking plan or available via a pay-as-you-go plan starting from $50.00 / 250K credits. It is implied that no credit card is required to begin exploring the API, but actual usage is paid.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "An MCP server exists, allowing data to be queried from inside AI assistants like Claude. URL: https://seranking.com/api/integrations/mcp/",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://seranking.com/api.html",
+      "https://www.postman.com/serankingdev/se-ranking-developers/overview",
+      "https://seranking.com/api/data/reference/"
+    ],
+    "confidence": "High",
+    "notes": "Authentication methods (API Key, Bearer Token) are inferred from the mention of 'API access', 'REST API reference', and 'Postman collection for endpoint testing', as explicit auth method names like 'OAuth2' or 'API Key' are not detailed in the scraped content. The 'No credit card required' statement on the main API page might refer to initial access or a limited free tier, but the pricing section clearly indicates paid plans for sustained API usage."
+  },
+  {
+    "app_name": "Ahrefs",
+    "category": "Unknown",
+    "one_liner": "Access Ahrefs marketing and search data through APIs and developer tools to build custom integrations and workflows, including connecting to AI assistants.",
+    "auth_methods": [
+      "API Key",
+      "OAuth2"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Paid Plan Required)",
+    "access_detail": "Ahrefs API is available on eligible paid plans. Free test queries are available on all other plans. Eligible paid plans include a monthly API unit allowance, with additional units charged on pay-as-you-go plans. OAuth2 is available for the Ahrefs Connect integration program.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "Ahrefs has an 'MCP' (Marketing Content Platform) section specifically for connecting Ahrefs data to AI assistants and agents like Claude and ChatGPT to enhance their answers.",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://docs.ahrefs.com/",
+      "https://docs.ahrefs.com/en/api/docs/introduction",
+      "https://docs.ahrefs.com/en/ahrefs-connect/docs/api-guide"
+    ],
+    "confidence": "High",
+    "notes": "The API requires an eligible paid plan for full access, but offers free test queries. OAuth2 is available for partner integrations through 'Ahrefs Connect'. The documentation explicitly mentions and supports integration with AI agents/assistants via their MCP."
+  },
+  {
+    "app_name": "MrScraper",
+    "category": "Unknown",
+    "one_liner": "AI-powered scraper to extract data from websites.",
+    "auth_methods": [
+      "API Key",
+      "Bearer Token"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free)",
+    "access_detail": "Registration available via 'Start now' link.",
+    "api_type": "REST",
+    "api_breadth": "Narrow (<10 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "https://zapier.com/mcp/mrscraper",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://docs.mrscraper.com/docs/features/activating-api",
+      "https://mrscraper.com/webscraperapi"
+    ],
+    "confidence": "High",
+    "notes": "The API offers two main modes of operation for AI scraping: one using a pre-configured 'scraperId' and another using a dynamic 'schema' to define the desired output for a given URL. The API key is sent as a Bearer token in the Authorization header."
+  },
+  {
+    "app_name": "Apify",
+    "category": "Unknown",
+    "one_liner": "Apify provides a platform for web scraping and automation using 'Actors', offering programmatic access via a REST API and SDKs.",
+    "auth_methods": [
+      "API Key",
+      "Bearer Token",
+      "Custom/Proprietary"
+    ],
+    "primary_auth": "Bearer Token",
+    "access_level": "Self-serve (Paid Plan Required)",
+    "access_detail": "API tokens are found on the 'Integrations' page in the Apify Console, implying an account is needed. Specific pricing or free tier details are not explicitly mentioned in the provided text, assuming a paid plan might be required for full access to the platform's capabilities.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "An MCP server exists at https://mcp.apify.com/. The platform explicitly supports the Model Context Protocol (MCP) for AI agents and LLMs, and a CLI client (mcpc) is available.",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://docs.apify.com/api/v2",
+      "https://docs.apify.com/",
+      "https://docs.apify.com/api"
+    ],
+    "confidence": "High",
+    "notes": "Apify actively supports AI agents through 'agentic payments' using x402 protocol and Skyfire headers, and by providing an MCP server, making it highly suitable for AI agent toolkit integration."
+  },
+  {
+    "app_name": "Firecrawl",
+    "category": "Web Scraping / Data Extraction",
+    "one_liner": "The context API to search, scrape, and interact with the web at scale, turning websites into clean, LLM-ready data.",
+    "auth_methods": [
+      "API Key",
+      "Bearer Token"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free)",
+    "access_detail": "Free for 1,000 pages every month (1,000 free credits per month). Paid plans (Hobby, Standard, Growth) for higher credit allotments and rate limits are available.",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "Firecrawl has an official MCP server for agents in Cursor, Claude, Windsurf, and other MCP-compatible tools to search, scrape, and interact with the web directly.",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://docs.firecrawl.dev/api-reference/introduction",
+      "https://docs.firecrawl.dev/api-reference/v2-introduction",
+      "https://www.firecrawl.dev/"
+    ],
+    "confidence": "High",
+    "notes": "Firecrawl offers SDKs for Python, Node.js, Go, Rust, Java, and Elixir. It is also an open-source project with a strong community. It specifically highlights 'Agentic Features' like 'Agent' and 'Browser' for AI applications. It provides 'llms.txt' for AI agents for documentation indexing."
+  },
+  {
+    "app_name": "Bright Data",
+    "category": "Web Data Platform",
+    "one_liner": "Bright Data is a web data platform that helps you collect, process and scale access to public web data, offering proxies, pre-built scrapers, datasets, and AI-ready APIs.",
+    "auth_methods": [
+      "API Key",
+      "Bearer Token"
+    ],
+    "primary_auth": "Bearer Token",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "5,000 free credits per month, no credit card required. First account deposit matched up to $500.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "found at: https://github.com/brightdata/brightdata-mcp",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://docs.brightdata.com/datasets/scraper-studio/quickstart",
+      "https://docs.brightdata.com/introduction",
+      "https://brightdata.com/glossary/api"
+    ],
+    "confidence": "High",
+    "notes": "The provided documentation is a quickstart for Scraper Studio API, showcasing two primary endpoints. However, the overall Bright Data platform offers various 'Web Access APIs' and 'Data Feeds' with 700+ pre-built scrapers, indicating a much broader API surface for different services like Unlocker API, SERP API, Browser API, etc. Authentication uses an API token passed as a Bearer Token."
+  },
+  {
+    "app_name": "Sherlock (OSINT via Apify)",
+    "category": "Social media",
+    "one_liner": "Hunt down social media accounts by username across social networks using the open-source project https://github.com/sherlock-project/sherlock.",
+    "auth_methods": [
+      "API Key"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Free trial and pay-per-usage available via Apify platform. Requires an Apify account and API token.",
+    "api_type": "REST",
+    "api_breadth": "Narrow (<10 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "Apify platform provides MCP integration for all its Actors, including Sherlock. The user-provided 'Sherlock.MCP.Server' NuGet package appears to be for a different 'Sherlock' project (a distributed locking library) and is not directly related to this Apify Actor.",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://apify.com/misceres/sherlock/api"
+    ],
+    "confidence": "High",
+    "notes": "There are multiple distinct software projects named 'Sherlock'. This analysis focuses on the 'Sherlock' Apify Actor, which leverages the OSINT tool from github.com/sherlock-project/sherlock, as indicated by the user's hint. Other documentation provided refers to a Python distributed locking library and an LLM platform, both also named 'Sherlock', and are not covered in this specific analysis."
+  },
+  {
+    "app_name": "Waterfall.io",
+    "category": "Data Enrichment / GTM Data",
+    "one_liner": "One B2B data solution to connect them all, providing GTM API for contact, email, and mobile number enrichment.",
+    "auth_methods": [
+      "API Key"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Partner/Contact-Sales Gated",
+    "access_detail": "Requires booking a call to get access to the API. Pricing is usage-based with no hidden fees.",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "Found at: https://leadmagic.io/blog/leadmagic-mcp-server-ai-assistant",
+    "existing_composio_integration": false,
+    "buildability": "Gated",
+    "main_blocker": "Requires sales/contact process to obtain API access, not immediately self-serve.",
+    "evidence_urls": [
+      "https://www.waterfall.io/",
+      "https://docs.waterfall.io/v1/introduction",
+      "https://www.linkedin.com/company/waterfall-io",
+      "https://leadmagic.io/blog/leadmagic-mcp-server-ai-assistant"
+    ],
+    "confidence": "High",
+    "notes": "API uses an 'x-api-key' header for authentication. Documentation samples show both 'x-waterfall-api-key' and 'x-api-key', but the official introduction states 'x-api-key'."
+  },
+  {
+    "app_name": "Clay",
+    "category": "Integration Platform",
+    "one_liner": "Quickly connect apps and custom code to create automated workflows and build tools for your team, facilitating seamless integration and connectivity with any APIs.",
+    "auth_methods": [
+      "API Key",
+      "Bearer Token",
+      "JWT"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Free trial available to start building.",
+    "api_type": "REST",
+    "api_breadth": "Undocumented / Unknown",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "Found at: https://www.clay.com/mcp",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://university.clay.com/docs/http-api-integration-overview",
+      "https://apitracker.io/a/clay-run",
+      "https://www.clay.com/glossary/api"
+    ],
+    "confidence": "Medium",
+    "notes": "The primary documentation provided describes Clay's 'HTTP API' feature, which allows Clay users to integrate with *external* APIs. Information about Clay's *native API* (for programmatic interaction with Clay itself) is primarily derived from `apitracker.io`, which mentions a 'Clay API Native API' and links to a Notion page (`https://www.notion.so/clayrun/clay-library-5223a65f2468499491da4d5a899d8072`) that was not included in the provided scrape. Therefore, the breadth of the native API is unknown, and the API type (REST) is inferred from the mention of standard tooling like Postman and OpenAPI specs by apitracker.io."
+  },
+  {
+    "app_name": "GitHub",
+    "category": "Developer Tools",
+    "one_liner": "A platform for software development, version control, and collaboration, with an API for programmatic interaction with its features.",
+    "auth_methods": [
+      "API Key",
+      "OAuth2",
+      "Bearer Token"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free)",
+    "access_detail": "Available across Free, Pro, & Team plans. Rate limits apply.",
+    "api_type": "REST + GraphQL",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": true,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://github.com/github/github-mcp-server",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://docs.github.com/en/rest",
+      "https://docs.github.com/",
+      "https://docs.github.com/rest/guides/getting-started-with-the-rest-api"
+    ],
+    "confidence": "High",
+    "notes": "Authentication methods mentioned are Personal Access Tokens (PATs), GitHub App tokens, and GITHUB_TOKEN in GitHub Actions. PATs function as API Keys/Bearer Tokens. GitHub Apps typically use OAuth2 flows to grant permissions and generate access tokens, hence OAuth2 is included."
+  },
+  {
+    "app_name": "Vercel",
+    "category": "Unknown",
+    "one_liner": "Vercel is a platform for deploying web applications, managing custom domains, and integrating with AI agents, offering infrastructure for modern web development and AI workloads.",
+    "auth_methods": [
+      "Bearer Token",
+      "API Key"
+    ],
+    "primary_auth": "Bearer Token",
+    "access_level": "Self-serve (Free)",
+    "access_detail": "Vercel Access Tokens are required for API authentication. Tokens can be created and managed in the user's account settings.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "Vercel offers Vercel MCP (Managed Compute Platform) servers to create tools for AI agents to interact with user systems. (https://vercel.com/docs/mcp)",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://vercel.com/docs/rest-api",
+      "https://vercel.com/docs",
+      "https://vercel.com/docs/cli/api"
+    ],
+    "confidence": "High",
+    "notes": "Vercel actively promotes and integrates with AI agents and related infrastructure (AI SDK, AI Gateway, Sandbox, Workflows, Vercel Agent, Vercel MCP)."
+  },
+  {
+    "app_name": "Netlify",
+    "category": "Web Hosting / Developer Tools",
+    "one_liner": "Netlify is a hosting service for the programmable web, providing APIs for atomic deploys of websites, managing form submissions, injecting JavaScript snippets, and integrating with AI agent toolkits.",
+    "auth_methods": [
+      "OAuth2",
+      "API Key"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Paid Plan Required)",
+    "access_detail": "Basic API access with rate limits (e.g., 500 requests/minute, 3 deploys/minute, 100 deploys/day). Higher limits require contacting support. Personal Access Tokens (API Keys) are self-generated for scripting; OAuth2 is required for public integrations.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "Netlify has an MCP server to share context & connect AI assistants to your Netlify account for seamless deployment workflows.",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://open-api.netlify.com/",
+      "https://docs.netlify.com/api-and-cli-guides/api-guides/get-started-with-api/",
+      "https://docs.netlify.com/"
+    ],
+    "confidence": "High",
+    "notes": "While Netlify offers a free tier, the API integrates with features that might require paid plans, hence 'Self-serve (Paid Plan Required)'. The documentation explicitly mentions use cases for AI code agents and has dedicated sections for AI Gateway, Agent Runners, and an MCP Server."
+  },
+  {
+    "app_name": "Cloudflare",
+    "category": "Unknown",
+    "one_liner": "Cloudflare provides a comprehensive platform for building, protecting, and optimizing applications and websites, offering a wide array of services from CDN and security to serverless compute and databases.",
+    "auth_methods": [
+      "API Key",
+      "Bearer Token"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Paid Plan Required)",
+    "access_detail": "Public API access is available, likely with varying features and usage limits based on subscription plans, with basic API access typically self-serve.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://developers.cloudflare.com/agents/model-context-protocol/cloudflare/servers-for-cloudflare/",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developers.cloudflare.com/api/",
+      "https://developers.cloudflare.com/",
+      "https://github.com/cloudflare/cloudflare-docs"
+    ],
+    "confidence": "High",
+    "notes": "Authentication methods inferred from 'AccountsTokens' and 'UserTokens' sections which describe creating, managing, and verifying tokens, strongly suggesting API Key or Bearer Token usage for direct API access."
+  },
+  {
+    "app_name": "Supabase",
+    "category": "Unknown",
+    "one_liner": "Supabase is an open-source Firebase alternative providing a full Postgres database, authentication, storage, real-time capabilities, and edge functions for building applications.",
+    "auth_methods": [
+      "API Key"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Self-serve access to a backend-as-a-service platform, typically offering a free tier for development.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://supabase.com/docs/guides/ai-tools/mcp",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://supabase.com/docs",
+      "https://supabase.com/docs/guides/api",
+      "https://supabase.com/docs/reference"
+    ],
+    "confidence": "High",
+    "notes": "The primary API for developers to interact with Supabase services (like the auto-generated Data REST API) uses API Keys. The 'Auth' product within Supabase itself supports OAuth, email/password, etc., for authenticating end-users of applications built on Supabase, which is distinct from developer authentication with the Supabase platform API."
+  },
+  {
+    "app_name": "Neo4j",
+    "category": "Graph Database",
+    "one_liner": "Neo4j is a leading graph database that stores and manages connected data, making it highly effective for modeling and querying complex relationships.",
+    "auth_methods": [
+      "Basic Auth"
+    ],
+    "primary_auth": "Basic Auth",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Neo4j Aura offers a free tier for its cloud service. Self-managed deployments are open source and can be self-hosted.",
+    "api_type": "REST + GraphQL",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": true,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://github.com/neo4j/mcp",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://neo4j.com/docs/rest-docs/current/",
+      "https://neo4j.com/docs/",
+      "https://neo4j.com/docs/java-reference/current/",
+      "https://neo4j.com/docs/http-api/current/"
+    ],
+    "confidence": "High",
+    "notes": "The primary documentation provided (rest-docs/current/) describes a deprecated REST API. Neo4j explicitly recommends using its current HTTP API, Bolt protocol via drivers, or the Neo4j GraphQL Library. The current HTTP API documentation (linked from the main docs portal) confirms Basic Authentication. The overall documentation for Neo4j's current APIs is comprehensive."
+  },
+  {
+    "app_name": "Snowflake",
+    "category": "Data Warehouse",
+    "one_liner": "A cloud data platform that enables data warehousing, data lakes, data engineering, data science, and application development.",
+    "auth_methods": [
+      "OAuth2",
+      "API Key"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Paid Plan Required)",
+    "access_detail": "Access to APIs and platform features requires a Snowflake account/subscription.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-agents-mcp",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://docs.snowflake.com/en/api-reference",
+      "https://docs.snowflake.com/en/developer",
+      "https://docs.snowflake.com/en/developer-guide/sql-api/index"
+    ],
+    "confidence": "High",
+    "notes": "Snowflake offers various APIs, including a REST API for general integration and a SQL API (also REST-based) for direct database interaction. Authentication methods for the SQL API include OAuth and Key Pair (likely API Key, often implemented as Bearer Token for REST)."
+  },
+  {
+    "app_name": "Amazon Selling Partner",
+    "category": "E-commerce Platform",
+    "one_liner": "REST-based API for Amazon sellers to programmatically access order, shipment, payment, and inventory data.",
+    "auth_methods": [
+      "OAuth2",
+      "API Key"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Admin/Org Approval Required",
+    "access_detail": "Public developers must list app in Amazon Selling Partner Appstore; requires Amazon account login for access",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "Found at https://github.com/mattcoatsworth/AmazonSeller-mcp-server",
+    "existing_composio_integration": false,
+    "buildability": "Feasible",
+    "main_blocker": "Requires Amazon account and Appstore listing for public apps",
+    "evidence_urls": [
+      "https://developer.amazonservices.com/",
+      "https://sell.amazon.com/developers",
+      "https://github.com/amzn/selling-partner-api-docs"
+    ],
+    "confidence": "High",
+    "notes": "SP-API is REST-based with OAuth2 for public apps; private apps use self-authorization. Sandbox environments available for testing."
+  },
+  {
+    "app_name": "Sherlock",
+    "category": "Social Media Intelligence / OSINT",
+    "one_liner": "Hunt down social media accounts by username across social networks using open-source project",
+    "auth_methods": [
+      "API Key"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Pay per usage with free trial available on Apify platform",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "Found at https://www.nuget.org/packages/Sherlock.MCP.Server",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "http://sher-lock.readthedocs.org/en/latest/api_documentation.html",
+      "https://apify.com/misceres/sherlock/api",
+      "https://docs.sherlock.cloudferro.com/category/documentation/"
+    ],
+    "confidence": "High",
+    "notes": "The documentation shows this is primarily an Apify Actor with REST API access, not a traditional software library with authentication. The Sherlock project itself is a Python library for OSINT, but the API documentation provided is for the Apify hosted version."
+  },
+  {
+    "app_name": "MongoDB Atlas",
+    "category": "Database as a Service (DBaaS)",
+    "one_liner": "A fully managed cloud database service for MongoDB that enables developers to build and scale applications with an AI-ready platform.",
+    "auth_methods": [
+      "OAuth2",
+      "API Key"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Requires a MongoDB Atlas account. Free tier available with paid plans for higher usage.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "Official MCP server is available at https://www.mongodb.com/products/tools/mcp-server",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://www.mongodb.com/docs/api/doc/atlas-admin-api-v2/",
+      "https://www.mongodb.com/docs/atlas/api/",
+      "https://www.mongodb.com/docs/atlas/api/atlas-admin-api-ref/"
+    ],
+    "confidence": "High",
+    "notes": "The Atlas Administration API is a comprehensive REST API for managing Atlas resources. OAuth2 with Service Accounts is the recommended authentication method, while API Keys are considered a legacy option. The API is self-serve and well-documented, making it highly suitable for building an AI agent toolkit."
+  },
+  {
+    "app_name": "Datadog",
+    "category": "Monitoring and Observability",
+    "one_liner": "Integrated platform for monitoring and security providing end-to-end visibility into infrastructure, applications, logs, and more.",
+    "auth_methods": [
+      "API Key"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Paid Plan Required)",
+    "access_detail": "Requires a paid Datadog account to access the API.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "Datadog offers an MCP Server for AI agent integration, mentioned in their AI product section.",
+    "existing_composio_integration": false,
+    "buildability": "Feasible",
+    "main_blocker": "Requires a paid Datadog account for API access.",
+    "evidence_urls": [
+      "https://docs.datadoghq.com/api/latest/",
+      "https://docs.datadoghq.com/extend/",
+      "https://docs.datadoghq.com/product/ai/mcp-server/"
+    ],
+    "confidence": "High",
+    "notes": "The documentation is extensive and well-structured. The API is REST-based and requires an API key for authentication. Access is gated behind a paid plan. An MCP server is available, which facilitates AI agent integration."
+  },
+  {
+    "app_name": "Sentry",
+    "category": "Application Monitoring and Debugging",
+    "one_liner": "Application performance monitoring and error tracking software",
+    "auth_methods": [
+      "API Key",
+      "Bearer Token"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Paid Plan Required)",
+    "access_detail": "Public API available, requires authentication token",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "MCP server available at https://mcp.sentry.dev/",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://develop.sentry.dev/getting-started/",
+      "https://docs.sentry.io/api/",
+      "https://docs.sentry.io/"
+    ],
+    "confidence": "High",
+    "notes": "Sentry has a public REST API with authentication via API keys. An MCP server exists for AI integration. Documentation is comprehensive with clear examples."
+  },
+  {
+    "app_name": "Notion",
+    "category": "Productivity and Note-Taking",
+    "one_liner": "API for reading, creating, and updating Notion pages, databases, and other workspace content.",
+    "auth_methods": [
+      "API Key",
+      "OAuth2",
+      "Bearer Token"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Free tier available with rate limits; requires creating a connection in the developer portal.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "Official Notion MCP server available at https://developers.notion.com/guides/mcp/overview",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developers.notion.com/guides/get-started/overview",
+      "https://developers.notion.com/reference/intro",
+      "https://developers.notion.com/reference/database"
+    ],
+    "confidence": "High",
+    "notes": "Notion supports three connection types: Internal (API Key), Public (OAuth2), and Personal Access Tokens (Bearer Token). All use the same REST API. The API is well-documented with clear examples and SDKs."
+  },
+  {
+    "app_name": "Airtable",
+    "category": "Database and Spreadsheet",
+    "one_liner": "A low-code platform for building collaborative apps and databases.",
+    "auth_methods": [
+      "API Key"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "API calls are rate limited and have URL length restrictions. Personal Access Tokens (PATs) are used for authentication.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "An MCP server exists and is documented in their support center.",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://www.airtable.com/developers/web/api/introduction",
+      "https://support.airtable.com/docs/api",
+      "https://www.airtable.com/developers/web/api/list-records"
+    ],
+    "confidence": "High",
+    "notes": "The API uses Personal Access Tokens (PATs) for authentication, which function as API Keys. The documentation is extensive and well-structured. The existence of an MCP server makes it particularly suitable for agent toolkits."
+  },
+  {
+    "app_name": "Linear",
+    "category": "Project Management / Issue Tracking",
+    "one_liner": "A fast, beautiful, and modern issue and project tracking tool for software teams.",
+    "auth_methods": [
+      "OAuth2",
+      "API Key"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "API keys can be created by admins or permitted members in settings. Webhooks require admin permissions.",
+    "api_type": "GraphQL",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": true,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "Changelog entry from 2025-05-01 indicates an MCP server exists.",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://linear.app/developers",
+      "https://linear.app/docs/api-and-webhooks",
+      "https://github.com/linear/linear"
+    ],
+    "confidence": "High",
+    "notes": "The documentation clearly outlines a public GraphQL API with OAuth2 and API Key authentication. Webhooks are also supported. The presence of an MCP server is confirmed by a changelog reference. The API appears to be well-documented and feature-rich, making it suitable for integration into an AI agent toolkit."
+  },
+  {
+    "app_name": "Jira",
+    "category": "Project Management",
+    "one_liner": "A popular issue and project tracking software developed by Atlassian.",
+    "auth_methods": [
+      "OAuth2",
+      "API Key",
+      "Basic Auth",
+      "JWT"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Paid Plan Required)",
+    "access_detail": "Requires Jira Cloud subscription with appropriate permissions. API access is included with paid plans.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "Atlassian has announced a Remote MCP server for Jira and other products.",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/",
+      "https://developer.atlassian.com/cloud/jira/platform/rest/v2/",
+      "https://developer.atlassian.com/"
+    ],
+    "confidence": "High",
+    "notes": "The documentation clearly outlines multiple authentication methods suitable for different use cases (Forge apps, Connect apps, ad-hoc scripts). The API is well-documented with versioning and comprehensive details on permissions, pagination, and asynchronous operations. The existence of an MCP server indicates strong support for AI integrations."
+  },
+  {
+    "app_name": "Asana",
+    "category": "Project Management and Collaboration",
+    "one_liner": "A platform for team collaboration and project management that provides a REST API for automation and integration.",
+    "auth_methods": [
+      "API Key"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Personal Access Token required for API access",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "MCP server available at https://developers.asana.com/docs/using-asanas-mcp-server",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developers.asana.com/",
+      "https://developers.asana.com/docs/api-explorer",
+      "https://developers.asana.com/reference/rest-api-reference"
+    ],
+    "confidence": "High",
+    "notes": "Personal Access Token authentication is the primary method. API explorer available for testing. Developer sandbox available for testing."
+  },
+  {
+    "app_name": "monday.com",
+    "category": "Work Management / Project Management",
+    "one_liner": "An AI work platform to connect enterprise data, automate workflows, and customize every surface.",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Free developer account with playground access and no expiration date.",
+    "api_type": "GraphQL",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": true,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "Developer MCP is available for building and deploying using AI, with CLI support.",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developer.monday.com/api-reference/",
+      "https://developer.monday.com/",
+      "https://developer.monday.com/api-reference/reference/docs"
+    ],
+    "confidence": "High",
+    "notes": "The API is exclusively GraphQL, which is well-documented. Authentication is OAuth2 with granular scopes. The existence of a developer MCP and the self-serve free developer account make it highly buildable for an AI agent toolkit."
+  },
+  {
+    "app_name": "ClickUp",
+    "category": "Project Management",
+    "one_liner": "A public API and MCP server for building integrations and apps with the ClickUp project management platform.",
+    "auth_methods": [
+      "API Key",
+      "OAuth2"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Personal API token for personal use; OAuth flow for apps used by others. Rate limits and endpoint availability depend on the Workspace Plan.",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "Official MCP server is available to connect AI assistants to ClickUp, with setup instructions and tool documentation provided.",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developer.clickup.com/",
+      "https://developer.clickup.com/reference",
+      "https://developer.clickup.com/docs/Getting%20Started"
+    ],
+    "confidence": "High",
+    "notes": "The documentation mentions both API v2 and v3, with v3 being rolled out incrementally. The API is RESTful and uses token-based authentication. The presence of an official MCP server significantly enhances its buildability for AI agent toolkits."
+  },
+  {
+    "app_name": "Coda",
+    "category": "Productivity / Document Automation",
+    "one_liner": "A RESTful API for programmatically interacting with Coda docs, including reading/writing data, managing structure, and automating workflows.",
+    "auth_methods": [
+      "Bearer Token"
+    ],
+    "primary_auth": "Bearer Token",
+    "access_level": "Self-serve (Free)",
+    "access_detail": "Available to all users in both free and paid workspaces, subject to user role permissions.",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "MCP server exists at https://coda.io/resources/guides/getting_started_with_coda_mcp and is optimized for LLM usage patterns.",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://coda.io/developers",
+      "https://coda.io/@oleg/getting-started-guide-coda-api",
+      "https://help.superhuman.com/hc/en-us/articles/46210310809613-Does-Coda-have-an-API"
+    ],
+    "confidence": "High",
+    "notes": "The API uses Bearer Token authentication. It is free for all users but has role-based access restrictions for certain actions like creating docs. Rate limits are in place and documented. The presence of an MCP server suggests good integration potential for AI agents."
+  },
+  {
+    "app_name": "Smartsheet",
+    "category": "Project Management and Collaboration",
+    "one_liner": "A cloud-based platform for project management, work execution, and collaboration that provides APIs for developers to integrate with Smartsheet data.",
+    "auth_methods": [
+      "API Key"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Paid Plan Required)",
+    "access_detail": "Requires registration and API key generation; access is tied to a Smartsheet account with appropriate permissions.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "Official Smartsheet MCP Server available at https://developers.smartsheet.com/ai-mcp/smartsheet/mcp-server",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developers.smartsheet.com/",
+      "https://smartsheet.redoc.ly/?_ga=2.188137640.1004839692.1717436157-1557843161.1706826382&_gl=1*tbqzf9*_gcl_au*MjA1MDMyNjI4LjE3MjY2MTY3MzE.*_ga*MTM2Njc0NjAzMC4xNzI2NjE2NzMx*_ga_ZYH7XNXMZK*MTcyODA4MTYyNi41NS4xLjE3MjgwODcyNzYuNjAuMC4w",
+      "https://community.smartsheet.com/discussion/147315/developer-api-and-getting-started"
+    ],
+    "confidence": "High",
+    "notes": "The documentation indicates a REST API with API key authentication. The presence of an official MCP server suggests strong support for AI agent integration. Access requires registration and is tied to a Smartsheet account."
+  },
+  {
+    "app_name": "Harvest",
+    "category": "Time Tracking and Project Management",
+    "one_liner": "Harvest is a simple time tracking and invoicing platform for freelancers and teams.",
+    "auth_methods": [
+      "API Key"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "All Harvest accounts (including free and trial) have API access. Permissions mirror account roles.",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "Support article exists for Harvest MCP server configuration.",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://help.getharvest.com/api-v2/",
+      "https://support.getharvest.com/hc/en-us/articles/360048180732-The-Harvest-API",
+      "https://support.getharvest.com/hc/en-us/articles/46293697226381-Harvest-MCP"
+    ],
+    "confidence": "High",
+    "notes": "Harvest provides a comprehensive REST API with clear documentation. API access is included in all account tiers, making it highly accessible for integration. The presence of an MCP server suggests existing automation capabilities."
+  },
+  {
+    "app_name": "Stripe",
+    "category": "Payments and Financial Infrastructure",
+    "one_liner": "Stripe provides payment processing and financial infrastructure for online businesses.",
+    "auth_methods": [
+      "API Key",
+      "Bearer Token"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Test API keys available after signing up for a free account",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "MCP server exists at https://docs.stripe.com/mcp",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://docs.stripe.com/",
+      "https://support.stripe.com/topics/api",
+      "https://stripe.com/guides"
+    ],
+    "confidence": "High",
+    "notes": "Stripe has extensive REST API documentation with comprehensive coverage of payment processing, billing, and financial services. The API uses API keys for authentication, which are standard for developer access. The presence of an existing MCP server indicates good integration potential for AI agent toolkits."
+  },
+  {
+    "app_name": "Plaid",
+    "category": "Financial Data Platform",
+    "one_liner": "Connect apps to users' financial accounts with secure API access to bank data, identity verification, and payments.",
+    "auth_methods": [
+      "API Key"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Paid Plan Required)",
+    "access_detail": "Requires registration and paid plan for API access",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "Official MCP server documentation available at https://plaid.com/docs/resources/mcp/",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://plaid.com/docs/",
+      "https://plaid.com/developer-policy/",
+      "https://devportalawards.org/nominees/2021/plaid"
+    ],
+    "confidence": "High",
+    "notes": "Plaid has extensive REST API covering banking, identity, payments, and more. Requires API key authentication. Developer portal won awards for documentation quality."
+  },
+  {
+    "app_name": "Binance",
+    "category": "Financial Trading",
+    "one_liner": "A comprehensive cryptocurrency exchange providing APIs for trading, wallet management, and various financial services.",
+    "auth_methods": [
+      "API Key",
+      "HMAC"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free)",
+    "access_detail": "API keys can be created by users directly from their account settings.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "An MCP server exists at https://github.com/TermiX-official/binance-mcp",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developers.binance.com/en",
+      "https://www.binance.com/en/binance-api",
+      "https://github.com/binance-exchange/binance-official-api-docs"
+    ],
+    "confidence": "High",
+    "notes": "Binance offers a wide range of APIs for different services including trading, wallet, and more. The documentation is extensive and well-maintained. Authentication is primarily via API Key with HMAC signature. A testnet is available for development."
+  },
+  {
+    "app_name": "Paygent Connect",
+    "category": "Payment Processing",
+    "one_liner": "NMI-powered payment gateway for accepting online and in-person payments.",
+    "auth_methods": [
+      "API Key"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Requires registration for sandbox access",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "MCP server exists at https://finxact.io/docs/document-detail/document/connect-to-the-mcp-server-in-cursor/",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developer.cybersource.com/api-reference-assets/index.html",
+      "https://docs.payaconnect.com/developers",
+      "https://developer.authorize.net/api/reference/index.html"
+    ],
+    "confidence": "Medium",
+    "notes": "Paygent Connect appears to be powered by NMI (CyberSource). Documentation shows standard REST API with API key authentication. MCP server exists but Composio integration status unclear."
+  },
+  {
+    "app_name": "iPayX",
+    "category": "Payment Processing",
+    "one_liner": "A payment processing platform for intermediaries with unified API for merchant processing and virtual card issuing.",
+    "auth_methods": [
+      "API Key"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Free trial available, paid plans for production use",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "MCP server exists at https://metatext.io/tools/mcps/io.github.ipayx-technologies-mcp-fx-audit",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://ipayx.ai/docs"
+    ],
+    "confidence": "Medium",
+    "notes": "Documentation scraped from iPayX website indicates a REST API with API key authentication. MCP server presence suggests existing tooling. Access appears self-serve with free trial option."
+  },
+  {
+    "app_name": "QuickBooks",
+    "category": "Accounting and Finance",
+    "one_liner": "Intuit's QuickBooks provides accounting and financial management software with APIs for online and desktop versions.",
+    "auth_methods": [
+      "OAuth2",
+      "API Key"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Requires Intuit developer account registration, includes sandbox environment for testing.",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": true,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "MCP server exists at https://github.com/intuit/quickbooks-online-mcp-server",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developer.intuit.com/app/developer/qbo/docs/develop",
+      "https://developer.intuit.com/app/developer/qbdesktop/docs/api-reference/qbdesktop"
+    ],
+    "confidence": "High",
+    "notes": "QuickBooks Online API uses OAuth2 with client credentials flow. QuickBooks Desktop API uses SDK-based authentication. GraphQL is supported alongside REST."
+  },
+  {
+    "app_name": "Xero",
+    "category": "Accounting and Finance",
+    "one_liner": "Cloud-based accounting platform with a comprehensive API for managing financial data, transactions, and reporting.",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Self-serve (Free)",
+    "access_detail": "Free account with demo company available for development",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "Official MCP server available at https://github.com/XeroAPI/xero-mcp-server",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developer.xero.com/documentation/api/accounting/overview",
+      "https://developer.xero.com/",
+      "https://developer.xero.com/documentation/getting-started-guide/"
+    ],
+    "confidence": "High",
+    "notes": "Xero provides a comprehensive REST API with OAuth2 authentication. The platform offers extensive documentation, SDKs, and developer tools. Multiple API endpoints are available for accounting functions, and an official MCP server exists for AI integration."
+  },
+  {
+    "app_name": "Brex",
+    "category": "Fintech / Corporate Spend Management",
+    "one_liner": "Unified spend platform with corporate cards, expense management, reimbursements, travel, and bill pay via API.",
+    "auth_methods": [
+      "API Key",
+      "Bearer Token"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Free trial available, paid plans start at $0 per user/month",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Excellent",
+    "existing_mcp": true,
+    "mcp_detail": "MCP server exists at https://www.brex.com/journal/brex-mcp-connect-brex-to-ai-tools",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developer.brex.com/",
+      "https://www.brex.com/product/api",
+      "https://www.brex.com/support/brex-api"
+    ],
+    "confidence": "High",
+    "notes": "API uses OpenAPI spec, supports multiple domains (accounting, expenses, payments, etc.). Slack community available for developer support."
+  },
+  {
+    "app_name": "Ramp",
+    "category": "FinTech / Spend Management",
+    "one_liner": "API for automating corporate spend, cards, and financial workflows.",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Admin/Org Approval Required",
+    "access_detail": "Requires admin access in Ramp dashboard to create developer app and request sandbox/production access via support.",
+    "api_type": "REST",
+    "api_breadth": "Broad (50+ endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "Ramp provides an MCP server for AI agents at https://docs.ramp.com/developer-api/v1/ramp-mcp, with guides for remote integration.",
+    "existing_composio_integration": false,
+    "buildability": "Feasible",
+    "main_blocker": "Sandbox access requires admin approval and contacting support for production access.",
+    "evidence_urls": [
+      "https://docs.ramp.com/",
+      "https://ramp.com/developer-tools",
+      "https://support.ramp.com/accessing-the-developer-api"
+    ],
+    "confidence": "High",
+    "notes": "API is REST-based with OAuth2 client credentials flow. MCP server exists for AI agent integration. Documentation is comprehensive with guides and OpenAPI schema."
+  },
+  {
+    "app_name": "PitchBook",
+    "category": "Financial Data and Market Intelligence",
+    "one_liner": "A comprehensive platform providing access to private and public market data, analytics, and research for investment professionals.",
+    "auth_methods": [
+      "API Key"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Partner/Contact-Sales Gated",
+    "access_detail": "Requires a standalone contract agreement and purchasing API credits. Access is granted via an account manager.",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "PitchBook has announced an Essential MCP integration with Perplexity to expand access to AI-powered verifiable market intelligence.",
+    "existing_composio_integration": false,
+    "buildability": "Gated",
+    "main_blocker": "Access is gated behind a sales process requiring a standalone contract and credit purchase.",
+    "evidence_urls": [
+      "https://pitchbook.com/help/PitchBook-api",
+      "https://documenter.getpostman.com/view/5190535/TzCV1iRc",
+      "https://pitchbook.com/products/direct-access-data"
+    ],
+    "confidence": "High",
+    "notes": "The API is a separate offering from the main platform, requiring a contract and credit purchase. A sandbox environment is available for testing upon request from an account manager."
+  },
+  {
+    "app_name": "NotebookLM",
+    "category": "AI/ML Tools",
+    "one_liner": "Google's AI-powered note-taking and research assistant with enterprise API access.",
+    "auth_methods": [
+      "API Key"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Partner/Contact-Sales Gated",
+    "access_detail": "Enterprise edition only, requires Google Cloud console access",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Poor",
+    "existing_mcp": true,
+    "mcp_detail": "Found at https://github.com/PleasePrompto/notebooklm-mcp",
+    "existing_composio_integration": false,
+    "buildability": "Gated",
+    "main_blocker": "Enterprise-only access requires sales/partner approval",
+    "evidence_urls": [
+      "https://docs.cloud.google.com/gemini/enterprise/notebooklm-enterprise/docs/api-notebooks",
+      "https://discuss.ai.google.dev/t/how-to-access-notebooklm-via-api/5084",
+      "https://www.youtube.com/watch?v=tXZlegQhV6Q"
+    ],
+    "confidence": "Medium",
+    "notes": "API exists but is enterprise-only. Public API requests are consistently denied in community forums. Documentation page is blocked by CAPTCHA. YouTube video confirms enterprise-only access."
+  },
+  {
+    "app_name": "Otter AI",
+    "category": "AI Assistant / Transcription",
+    "one_liner": "AI-powered meeting assistant that records, transcribes, and summarizes conversations.",
+    "auth_methods": [
+      "OAuth2",
+      "API Key"
+    ],
+    "primary_auth": "OAuth2",
+    "access_level": "Admin/Org Approval Required",
+    "access_detail": "Public API available for Enterprise customers only; requires contacting account manager to enable access.",
+    "api_type": "REST",
+    "api_breadth": "Narrow (<10 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Fair",
+    "existing_mcp": true,
+    "mcp_detail": "Official Otter MCP Server available at https://help.otter.ai/hc/en-us/articles/35287607569687-Otter-MCP-Server",
+    "existing_composio_integration": false,
+    "buildability": "Feasible",
+    "main_blocker": "Access requires Enterprise account and admin approval; not self-serve.",
+    "evidence_urls": [
+      "https://help.otter.ai/hc/en-us/articles/4412365535895-Does-Otter-offer-an-open-API",
+      "https://help.otter.ai/hc/en-us/articles/36130822688279-Otter.ai-Public-API",
+      "https://github.com/gmchad/otterai-api"
+    ],
+    "confidence": "High",
+    "notes": "Public API exists but is gated to Enterprise customers. OAuth2 is the primary auth method with Bearer tokens. An unofficial Python SDK exists on GitHub, but official docs are limited to Enterprise access."
+  },
+  {
+    "app_name": "Fathom",
+    "category": "Meeting Intelligence",
+    "one_liner": "API for accessing meeting insights, recordings, summaries, and transcripts.",
+    "auth_methods": [
+      "API Key"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free)",
+    "access_detail": "API keys are created at the user level; free to browse docs and start building.",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "MCP server documentation exists at https://developers.fathom.ai/mcp-docs",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://developers.fathom.ai/",
+      "https://developers.fathom.ai/api-overview",
+      "https://help.fathom.video/en/articles/8368641"
+    ],
+    "confidence": "High",
+    "notes": null
+  },
+  {
+    "app_name": "Consensus",
+    "category": "Research & Knowledge Management",
+    "one_liner": "API for integrating peer-reviewed research citations and metadata into custom workflows.",
+    "auth_methods": [
+      "API Key"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Paid Plan Required)",
+    "access_detail": "Application required; pricing starts at $0.10 per call plus platform fee.",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "MCP server exists at https://consensus.app/home/mcp/",
+    "existing_composio_integration": false,
+    "buildability": "Feasible",
+    "main_blocker": "Requires application and paid access; not self-serve free tier.",
+    "evidence_urls": [
+      "https://consensus.app/home/api/",
+      "https://support.goconsensus.com/consensus-api-documents",
+      "https://www.consensus.com/healthcare-api/"
+    ],
+    "confidence": "High",
+    "notes": "API documentation references Open API and credentials are generated via Integrations section. The healthcare API page appears to be general information about healthcare APIs rather than specific to Consensus's API."
+  },
+  {
+    "app_name": "Reducto",
+    "category": "Document Processing",
+    "one_liner": "Agentic document platform for AI teams to parse, classify, extract, and edit documents at enterprise scale.",
+    "auth_methods": [
+      "API Key"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Free Trial)",
+    "access_detail": "Try for free via Studio; paid plans available for production workloads",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "MCP server available at https://www.gumloop.com/mcp/reducto and documented in Reducto docs",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://docs.reducto.ai/overview",
+      "https://docs.reducto.ai/quickstart",
+      "https://reducto.ai/"
+    ],
+    "confidence": "High",
+    "notes": "Reducto provides a comprehensive document processing API with SDKs for Python, Node.js, and Go. Authentication is via API key set in environment variable REDUCTO_API_KEY. The MCP server integration makes it particularly suitable for AI agent toolkits. The platform supports 30+ file types and offers both SaaS and on-premises deployment options."
+  },
+  {
+    "app_name": "Devin",
+    "category": "AI Software Engineer",
+    "one_liner": "An autonomous AI software engineer that can write, run, and test code to handle engineering tasks.",
+    "auth_methods": [
+      "Bearer Token"
+    ],
+    "primary_auth": "Bearer Token",
+    "access_level": "Self-serve (Paid Plan Required)",
+    "access_detail": "Individual and Teams plans available; enterprise access requires contacting Cognition.",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "MCP server exists at https://docs.devin.ai/work-with-devin/devin-mcp",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://docs.devin.ai/api-reference/overview",
+      "https://docs.devin.ai/get-started/devin-intro",
+      "https://medium.com/@universe3523/boosting-documentation-with-devin-ai-2257cfb04c79"
+    ],
+    "confidence": "High",
+    "notes": "API uses Bearer Token authentication with service users. Two API scopes: Organization and Enterprise. Legacy v1/v2 APIs are deprecated but still functional."
+  },
+  {
+    "app_name": "Higgsfield",
+    "category": "AI Content Generation",
+    "one_liner": "AI-powered content generation suite for images and videos via API",
+    "auth_methods": [
+      "API Key",
+      "Bearer Token"
+    ],
+    "primary_auth": "API Key",
+    "access_level": "Self-serve (Paid Plan Required)",
+    "access_detail": "API credentials obtained from Higgsfield Cloud dashboard",
+    "api_type": "REST",
+    "api_breadth": "Moderate (10-50 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "MCP server exists at https://higgsfield.ai/cli",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://cloud.higgsfield.ai/",
+      "https://github.com/higgsfield-ai/higgsfield-client",
+      "https://www.pixazo.ai/models/higgsfield"
+    ],
+    "confidence": "High",
+    "notes": "Primary API is image-to-video generation with webhook support. Python SDK available for easier integration."
+  },
+  {
+    "app_name": "Mermaid CLI",
+    "category": "Developer Tools",
+    "one_liner": "Command-line tool for converting Mermaid diagrams to SVG, PNG, PDF, and JPG.",
+    "auth_methods": [
+      "No Auth / Open"
+    ],
+    "primary_auth": "No Auth / Open",
+    "access_level": "Open Source / Self-hosted",
+    "access_detail": "Available via npm, Docker, and direct source code installation.",
+    "api_type": "SDK Only (No REST)",
+    "api_breadth": "Narrow (<10 endpoints)",
+    "has_graphql": false,
+    "api_doc_quality": "Good",
+    "existing_mcp": true,
+    "mcp_detail": "MCP server exists at https://github.com/hustcc/mcp-mermaid",
+    "existing_composio_integration": false,
+    "buildability": "Ready",
+    "main_blocker": null,
+    "evidence_urls": [
+      "https://github.com/mermaid-js/mermaid-cli",
+      "https://mermaid.ai/open-source/config/mermaidCLI.html",
+      "https://mermaid2img.com/blog/another-way-to-convert-mermaid-to-img-for-developer"
+    ],
+    "confidence": "High",
+    "notes": "The primary interface is a command-line tool, not a REST API. It can be used programmatically via a Node.js API, which is the closest thing to an API surface. Authentication is not required as it's a local tool."
+  }
+]
+    </script>
+    <script id="analysisData" type="application/json">
+        {
+  "auth_distribution": {
+    "OAuth2": 43,
+    "API Key": 52,
+    "Basic Auth": 2,
+    "Bearer Token": 5,
+    "No Auth / Open": 1
+  },
+  "access_by_category": {
+    "CRM and Sales": {
+      "self_serve": 10,
+      "gated": 1
+    },
+    "Documents & Productivity": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Customer Service": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Customer Support": {
+      "self_serve": 3,
+      "gated": 0
+    },
+    "Unknown": {
+      "self_serve": 11,
+      "gated": 2
+    },
+    "Customer Service Management": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Customer Support / Helpdesk": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Communication": {
+      "self_serve": 2,
+      "gated": 0
+    },
+    "Communications Platform": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Communication and Collaboration": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Workplace Collaboration": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Team Communication": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Social / Communication": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Communication / Business Messaging": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Voice/Call Center": {
+      "self_serve": 0,
+      "gated": 1
+    },
+    "Communication & Network APIs": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Advertising": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Marketing": {
+      "self_serve": 0,
+      "gated": 1
+    },
+    "Marketing Automation": {
+      "self_serve": 3,
+      "gated": 0
+    },
+    "Social Media": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Email Service": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Ecommerce": {
+      "self_serve": 5,
+      "gated": 1
+    },
+    "Payments & Subscriptions": {
+      "self_serve": 0,
+      "gated": 1
+    },
+    "E-commerce & Retail": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "SEO and Digital Marketing": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "SEO & GEO Data": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Web Scraping / Data Extraction": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Web Data Platform": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Social media": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Data Enrichment / GTM Data": {
+      "self_serve": 0,
+      "gated": 1
+    },
+    "Integration Platform": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Developer Tools": {
+      "self_serve": 1,
+      "gated": 1
+    },
+    "Web Hosting / Developer Tools": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Graph Database": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Data Warehouse": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "E-commerce Platform": {
+      "self_serve": 0,
+      "gated": 1
+    },
+    "Payments and Subscriptions": {
+      "self_serve": 0,
+      "gated": 1
+    },
+    "Social Media Intelligence / OSINT": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Database as a Service (DBaaS)": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Monitoring and Observability": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Application Monitoring and Debugging": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Productivity and Note-Taking": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Database and Spreadsheet": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Project Management / Issue Tracking": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Project Management": {
+      "self_serve": 2,
+      "gated": 0
+    },
+    "Project Management and Collaboration": {
+      "self_serve": 2,
+      "gated": 0
+    },
+    "Work Management / Project Management": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Productivity / Document Automation": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Time Tracking and Project Management": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Payments and Financial Infrastructure": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Financial Data Platform": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Financial Trading": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Payment Processing": {
+      "self_serve": 2,
+      "gated": 0
+    },
+    "Accounting and Finance": {
+      "self_serve": 2,
+      "gated": 0
+    },
+    "Fintech / Corporate Spend Management": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "FinTech / Spend Management": {
+      "self_serve": 0,
+      "gated": 1
+    },
+    "Financial Data and Market Intelligence": {
+      "self_serve": 0,
+      "gated": 1
+    },
+    "AI/ML Tools": {
+      "self_serve": 0,
+      "gated": 1
+    },
+    "AI Assistant / Transcription": {
+      "self_serve": 0,
+      "gated": 1
+    },
+    "Meeting Intelligence": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Research & Knowledge Management": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Document Processing": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "AI Software Engineer": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "AI Content Generation": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Data Extraction": {
+      "self_serve": 1,
+      "gated": 0
+    },
+    "Meeting Notes": {
+      "self_serve": 1,
+      "gated": 0
+    }
+  },
+  "buildability_breakdown": {
+    "Ready": 85,
+    "Feasible": 11,
+    "Gated": 7
+  },
+  "top_patterns": [
+    "OAuth2 dominates user-facing applications like CRM, Marketing, and Ecommerce, while API Keys are the standard for Developer Tools, Data Platforms, and many SaaS products.",
+    "The vast majority of APIs (over 80%) are marked 'Ready' for integration, indicating a mature and accessible API economy, but a significant minority require sales or admin approval.",
+    "Access friction is highest in high-value verticals like Financial Data (PitchBook), Payments (FanBasis), and Enterprise-focused tools, where gated access is common.",
+    "Developer Tools and Data Infrastructure APIs overwhelmingly favor API Keys for simplicity and programmatic access, contrasting with the user-centric OAuth2 flow."
+  ],
+  "easy_wins": [
+    "Pipedrive",
+    "GitHub",
+    "Shopify",
+    "Twilio",
+    "Airtable"
+  ],
+  "hard_nuts": [
+    "DealCloud",
+    "PitchBook",
+    "Ramp",
+    "Gladly",
+    "LinkedIn Ads"
+  ],
+  "executive_summary": "The API landscape is overwhelmingly buildable, with over 80% of applications marked 'Ready' for integration, signaling a low barrier to entry for new connections. A clear strategic pattern emerges: OAuth2 is the dominant authentication method for user-centric applications in CRM, marketing, and ecommerce, while API Keys remain the standard for developer tools and data platforms. However, significant opportunities and challenges lie in the gated access models. High-value verticals like financial data (PitchBook), payments (FanBasis), and enterprise software (DealCloud) often require sales or administrative approval, creating a barrier to rapid integration. Our strategy should prioritize the 'Easy Wins'\u2014self-serve, free-tier APIs\u2014for rapid market expansion, while concurrently developing a specialized playbook for navigating the 'Hard Nuts' to unlock high-value, enterprise-grade integrations."
+}
+    </script>
+    <script id="verificationData" type="application/json">
+        {
+  "first_pass_accuracy": {
+    "primary_auth": "71.4%",
+    "buildability": "66.7%"
+  },
+  "sample_details": [
+    {
+      "app_name": "monday.com",
+      "field_name": "primary_auth",
+      "agent_value": "OAuth2",
+      "actual_value": "personal V2 API tokens",
+      "is_correct": false,
+      "evidence_url": "See Trajectory",
+      "notes": "The monday.com API documentation clearly states that it uses 'personal V2 API tokens' for authentication, not OAuth2. Authentication is done by passing the token in the Authorization header.",
+      "agent_trajectory": [
+        "SEARCH: monday.com API authentication method developer docs",
+        "SCRAPE: https://developer.monday.com/api-reference/docs/authentication",
+        "FINISH: {\"is_correct\": false, \"actual_value\": \"personal V2 API tokens\", \"explanation\": \"The monday.com API documentation clearly states that it uses 'personal V2 API tokens' for authentication, not OAuth2. Authentication is done by passing the token in the Authorization header.\"}"
+      ]
+    },
+    {
+      "app_name": "systeme.io",
+      "field_name": "primary_auth",
+      "agent_value": "API Key",
+      "actual_value": "API Key",
+      "is_correct": true,
+      "evidence_url": "See Trajectory",
+      "notes": "The official developer documentation for systeme.io's API explicitly states: 'To authenticate with the Systeme.io Public API, your only option right now is to attach your API key to the `X-API-Key` header of each request.' This confirms that API Key is the primary authentication method.",
+      "agent_trajectory": [
+        "SEARCH: systeme.io API authentication developer docs",
+        "SCRAPE: https://help.systeme.io/article/2329-how-to-use-systeme-io-public-api",
+        "SCRAPE: https://developer.systeme.io/reference/api",
+        "FINISH: {\"is_correct\": true, \"actual_value\": \"API Key\", \"explanation\": \"The official developer documentation for systeme.io's API explicitly states: 'To authenticate with the Systeme.io Public API, your only option right now is to attach your API key to the `X-API-Key` header of each request.' This confirms that API Key is the primary authentication method.\"}"
+      ]
+    },
+    {
+      "app_name": "Podio",
+      "field_name": "primary_auth",
+      "agent_value": "OAuth2",
+      "actual_value": "OAuth2",
+      "is_correct": true,
+      "evidence_url": "See Trajectory",
+      "notes": "The official Podio API documentation (https://developers.podio.com/authentication) explicitly states that 'The Podio API uses the OAuth2 protocol for authentication.' This confirms that OAuth2 is the primary authentication method.",
+      "agent_trajectory": [
+        "SEARCH: Podio API authentication method developer docs",
+        "FINISH: {\"is_correct\": true, \"actual_value\": \"OAuth2\", \"explanation\": \"The official Podio API documentation (https://developers.podio.com/authentication) explicitly states that 'The Podio API uses the OAuth2 protocol for authentication.' This confirms that OAuth2 is the primary authentication method.\"}"
+      ]
+    },
+    {
+      "app_name": "Netlify",
+      "field_name": "primary_auth",
+      "agent_value": "OAuth2",
+      "actual_value": "OAuth2",
+      "is_correct": true,
+      "evidence_url": "See Trajectory",
+      "notes": "The official Netlify API documentation explicitly states 'Netlify uses OAuth2 for authentication' and provides details on using OAuth2 access tokens for API requests. Personal Access Tokens (PATs) are generated through the OAuth2 flow and used with Bearer tokens for authentication.",
+      "agent_trajectory": [
+        "SEARCH: Netlify API authentication method developer docs OAuth API keys",
+        "SCRAPE: https://docs.netlify.com/api-and-cli-guides/api-guides/get-started-with-api/",
+        "FINISH: {\"is_correct\": true, \"actual_value\": \"OAuth2\", \"explanation\": \"The official Netlify API documentation explicitly states 'Netlify uses OAuth2 for authentication' and provides details on using OAuth2 access tokens for API requests. Personal Access Tokens (PATs) are generated through the OAuth2 flow and used with Bearer tokens for authentication.\"}"
+      ]
+    },
+    {
+      "app_name": "Netlify",
+      "field_name": "buildability",
+      "agent_value": "Ready",
+      "actual_value": "Ready",
+      "is_correct": true,
+      "evidence_url": "See Trajectory",
+      "notes": "The Netlify API documentation confirms a fully functional REST API with OAuth2 authentication, atomic deploys, file/ZIP upload methods, rate limiting, and comprehensive management capabilities. This demonstrates the API is production-ready and supports all necessary build operations.",
+      "agent_trajectory": [
+        "SEARCH: Netlify buildability status API ready developer documentation",
+        "SCRAPE: https://docs.netlify.com/api-and-cli-guides/api-guides/get-started-with-api/",
+        "FINISH: {\"is_correct\": true, \"actual_value\": \"Ready\", \"explanation\": \"The Netlify API documentation confirms a fully functional REST API with OAuth2 authentication, atomic deploys, file/ZIP upload methods, rate limiting, and comprehensive management capabilities. This demonstrates the API is production-ready and supports all necessary build operations.\"}"
+      ]
+    },
+    {
+      "app_name": "Zoho Cliq",
+      "field_name": "primary_auth",
+      "agent_value": "OAuth2",
+      "actual_value": "OAuth2",
+      "is_correct": true,
+      "evidence_url": "See Trajectory",
+      "notes": "The official Zoho Cliq API documentation explicitly states 'Zoho Cliq API uses the OAuth 2.0 protocol for authentication.' This directly confirms the claim that the primary authentication method is OAuth2.",
+      "agent_trajectory": [
+        "SEARCH: Zoho Cliq API authentication method OAuth2 developer docs",
+        "SCRAPE: https://www.zoho.com/cliq/help/restapi/v3/introduction/",
+        "FINISH: {\"is_correct\": true, \"actual_value\": \"OAuth2\", \"explanation\": \"The official Zoho Cliq API documentation explicitly states 'Zoho Cliq API uses the OAuth 2.0 protocol for authentication.' This directly confirms the claim that the primary authentication method is OAuth2.\"}"
+      ]
+    },
+    {
+      "app_name": "Vercel",
+      "field_name": "primary_auth",
+      "agent_value": "Bearer Token",
+      "actual_value": "Bearer Token",
+      "is_correct": true,
+      "evidence_url": "See Trajectory",
+      "notes": "The Vercel REST API documentation explicitly states that authentication is done using Vercel Access Tokens included in the Authorization header with the format 'Authorization: Bearer <TOKEN>'. This confirms that Bearer Token is the primary authentication method for the Vercel API.",
+      "agent_trajectory": [
+        "SEARCH: Vercel API authentication method developer docs",
+        "SCRAPE: https://vercel.com/docs/rest-api",
+        "FINISH: {\"is_correct\": true, \"actual_value\": \"Bearer Token\", \"explanation\": \"The Vercel REST API documentation explicitly states that authentication is done using Vercel Access Tokens included in the Authorization header with the format 'Authorization: Bearer <TOKEN>'. This confirms that Bearer Token is the primary authentication method for the Vercel API.\"}"
+      ]
+    },
+    {
+      "app_name": "Vercel",
+      "field_name": "buildability",
+      "agent_value": "Ready",
+      "actual_value": "Ready",
+      "is_correct": true,
+      "evidence_url": "See Trajectory",
+      "notes": "The Vercel Status page shows that the 'Builds' service is currently marked as 'Operational', indicating the build system is ready and functioning normally with no current incidents affecting builds.",
+      "agent_trajectory": [
+        "SEARCH: Vercel build system status ready",
+        "SCRAPE: https://www.vercel-status.com/",
+        "FINISH: {\"is_correct\": true, \"actual_value\": \"Ready\", \"explanation\": \"The Vercel Status page shows that the 'Builds' service is currently marked as 'Operational', indicating the build system is ready and functioning normally with no current incidents affecting builds.\"}"
+      ]
+    },
+    {
+      "app_name": "LiveAgent",
+      "field_name": "primary_auth",
+      "agent_value": "API Key",
+      "actual_value": "API Key",
+      "is_correct": false,
+      "evidence_url": "See Trajectory",
+      "notes": "While the claimed value 'API Key' is correct for LiveAgent's authentication method, there is no field called 'primary_auth' mentioned in the official documentation. The actual authentication uses an API key passed in the request header (e.g., 'apikey' header), not a field named 'primary_auth'.",
+      "agent_trajectory": [
+        "SEARCH: LiveAgent API authentication method developer docs",
+        "SCRAPE: https://support.liveagent.com/066804-LiveAgent-API",
+        "SCRAPE: https://support.liveagent.com/741982-API-key",
+        "SCRAPE: https://support.liveagent.com/840770-Complete-API-reference",
+        "FINISH: {\"is_correct\": false, \"actual_value\": \"API Key\", \"explanation\": \"While the claimed value 'API Key' is correct for LiveAgent's authentication method, there is no field called 'primary_auth' mentioned in the official documentation. The actual authentication uses an API key passed in the request header (e.g., 'apikey' header), not a field named 'primary_auth'.\"}"
+      ]
+    },
+    {
+      "app_name": "MongoDB Atlas",
+      "field_name": "buildability",
+      "agent_value": "Ready",
+      "actual_value": "Not Ready",
+      "is_correct": false,
+      "evidence_url": "See Trajectory",
+      "notes": "The MongoDB Atlas status page indicates severe and ongoing service disruptions in the AWS me-central-1 (UAE) and me-south-1 (Bahrain) regions. Workloads in these regions are described as 'significantly impaired' or 'currently not operational', making the service not ready for use in these areas. Therefore, the claim that Atlas is 'Ready' is incorrect.",
+      "agent_trajectory": [
+        "SEARCH: MongoDB Atlas status page service availability buildability",
+        "SCRAPE: https://status.mongodb.com/",
+        "FINISH: {\"is_correct\": false, \"actual_value\": \"Not Ready\", \"explanation\": \"The MongoDB Atlas status page indicates severe and ongoing service disruptions in the AWS me-central-1 (UAE) and me-south-1 (Bahrain) regions. Workloads in these regions are described as 'significantly impaired' or 'currently not operational', making the service not ready for use in these areas. Therefore, the claim that Atlas is 'Ready' is incorrect.\"}"
+      ]
+    }
+  ],
+  "common_errors": [
+    "To be populated by analyzer if needed"
+  ],
+  "unreachable_urls": 0
+}
+    </script>
+
+    <!-- Application Logic -->
+    <script>
+        // Load Data
+        let results = [];
+        let analysis = {};
+        
+        try {
+            results = JSON.parse(document.getElementById('resultsData').textContent || '[]');
+            analysis = JSON.parse(document.getElementById('analysisData').textContent || '{}');
+        } catch (e) {
+            console.error("Error parsing data JSON", e);
+        }
+
+        // --- Init Stats ---
+        function initStats() {
+            if (results.length === 0) return;
+            
+            const total = results.length;
+            const ready = results.filter(r => r.buildability === 'Ready').length;
+            
+            let oauthCount = 0;
+            let selfServeCount = 0;
+            
+            results.forEach(r => {
+                if (r.primary_auth && r.primary_auth.toLowerCase().includes('oauth')) oauthCount++;
+                if (r.access_level && r.access_level.toLowerCase().includes('self-serve')) selfServeCount++;
+            });
+
+            const grid = document.getElementById('statsGrid');
+            grid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${total}</div>
+                    <div class="stat-label">Apps Researched</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: var(--success);">${ready}</div>
+                    <div class="stat-label">Ready to Build</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${Math.round((oauthCount/total)*100)}%</div>
+                    <div class="stat-label">Utilize OAuth2</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" style="color: var(--chart-2);">${Math.round((selfServeCount/total)*100)}%</div>
+                    <div class="stat-label">Self-Serve Access</div>
+                </div>
+            `;
+        }
+
+        // --- Init Insights ---
+        function initInsights() {
+            if (!analysis.executive_summary) return;
+            
+            document.getElementById('executiveSummary').textContent = analysis.executive_summary;
+            
+            const topList = document.getElementById('topPatterns');
+            analysis.top_patterns.forEach(p => {
+                topList.innerHTML += `<div class="insight-item"><div class="insight-icon">🔍</div><p>${p}</p></div>`;
+            });
+            
+            const easyList = document.getElementById('easyWins');
+            analysis.easy_wins.forEach(p => {
+                easyList.innerHTML += `<div class="insight-item"><div class="insight-icon" style="color:var(--success); background:#edf5ed;">✓</div><p>${p}</p></div>`;
+            });
+            
+            const hardList = document.getElementById('hardNuts');
+            analysis.hard_nuts.forEach(p => {
+                hardList.innerHTML += `<div class="insight-item"><div class="insight-icon" style="color:var(--warning); background:#fdf6e9;">⚠</div><p>${p}</p></div>`;
+            });
+        }
+
+        // --- Init Charts ---
+        function initCharts() {
+            if (!analysis.auth_distribution) return;
+            
+            Chart.defaults.color = '#66635f';
+            Chart.defaults.font.family = 'Inter';
+            Chart.defaults.font.size = 13;
+            
+            const authCtx = document.getElementById('authChart').getContext('2d');
+            new Chart(authCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(analysis.auth_distribution),
+                    datasets: [{
+                        data: Object.values(analysis.auth_distribution),
+                        backgroundColor: ['#d97757', '#5b6e5b', '#d4a27f', '#5d6e80', '#a38c78', '#cfb9a5'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { position: 'bottom', labels: { padding: 20 } } 
+                    },
+                    cutout: '65%'
+                }
+            });
+
+            const buildCtx = document.getElementById('buildChart').getContext('2d');
+            const bData = analysis.buildability_breakdown;
+            const bOrder = ['Ready', 'Feasible', 'Gated', 'Blocked'];
+            const bVals = bOrder.map(k => bData[k] || 0);
+            
+            new Chart(buildCtx, {
+                type: 'bar',
+                data: {
+                    labels: bOrder,
+                    datasets: [{
+                        label: 'Number of Apps',
+                        data: bVals,
+                        backgroundColor: ['#3c6e47', '#b56d22', '#b03a3a', '#937862'],
+                        borderRadius: 4,
+                        barThickness: 30
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: '#e6e4df', drawBorder: false } },
+                        y: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // --- Init Table ---
+        function getBadgeClass(val) {
+            if (!val) return '';
+            const lower = val.toLowerCase();
+            if (lower === 'ready') return 'badge-ready';
+            if (lower === 'feasible') return 'badge-feasible';
+            if (lower === 'gated') return 'badge-gated';
+            if (lower === 'blocked') return 'badge-blocked';
+            return 'badge-auth';
+        }
+        
+        function toggleRow(id) {
+            const el = document.getElementById('detail-' + id);
+            const icon = document.getElementById('icon-' + id);
+            if (el.style.display === 'table-row') {
+                el.style.display = 'none';
+                icon.textContent = '+';
+            } else {
+                el.style.display = 'table-row';
+                icon.textContent = '−';
+            }
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            data.forEach((app, i) => {
+                const badgeClass = getBadgeClass(app.buildability);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="row-toggle" onclick="toggleRow(${i})"><span id="icon-${i}" style="font-size:1.2rem; display:inline-block; width:20px; height:20px; line-height:20px; border:1px solid var(--border); border-radius:4px;">+</span></td>
+                    <td style="font-weight:600; color:var(--text-main); font-size:0.95rem;">${app.app_name}</td>
+                    <td><span style="color:var(--text-muted); font-size:0.9rem;">${app.category}</span></td>
+                    <td><span class="badge badge-auth">${app.primary_auth}</span></td>
+                    <td style="font-size:0.9rem; color:var(--text-muted);">${app.access_level}</td>
+                    <td><span class="badge ${badgeClass}">${app.buildability}</span></td>
+                `;
+                
+                const trDetail = document.createElement('tr');
+                trDetail.id = `detail-${i}`;
+                trDetail.className = 'detail-row';
+                
+                let urlsHtml = '';
+                if (app.evidence_urls) {
+                    urlsHtml = app.evidence_urls.map(u => `<a href="${u}" target="_blank">View Source Document ↗</a>`).join('<br><br>');
+                }
+                
+                trDetail.innerHTML = `
+                    <td colspan="6" style="padding:0;">
+                        <div class="detail-content">
+                            <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:3rem;">
+                                <div>
+                                    <p style="margin-bottom:1.5rem; color:var(--text-main); font-size:1.05rem; font-family:'Crimson Pro',serif; line-height:1.4;"><em>"${app.one_liner}"</em></p>
+                                    <p style="margin-bottom:0.5rem"><strong>API Type:</strong> ${app.api_type} <span style="color:var(--text-muted)">(${app.api_breadth})</span></p>
+                                    <p style="margin-bottom:0.5rem"><strong>Access Details:</strong> ${app.access_detail}</p>
+                                    <p><strong>Primary Blocker:</strong> ${app.main_blocker || '<span style="color:var(--text-muted)">None (Ready to build)</span>'}</p>
+                                </div>
+                                <div>
+                                    <p style="margin-bottom:0.5rem"><strong>Existing MCP Server:</strong> ${app.existing_mcp ? '<span style="color:var(--success); font-weight:600;">Yes</span>' : 'No'} ${app.mcp_detail ? `<span style="color:var(--text-muted)">(${app.mcp_detail})</span>` : ''}</p>
+                                    <p style="font-size:0.9rem;">${urlsHtml}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                `;
+                
+                tbody.appendChild(tr);
+                tbody.appendChild(trDetail);
+            });
+        }
+        
+        function populateFilters() {
+            if (results.length === 0) return;
+            const cats = [...new Set(results.map(r => r.category))].sort();
+            const builds = [...new Set(results.map(r => r.buildability))].sort();
+            
+            const catSel = document.getElementById('catFilter');
+            cats.forEach(c => catSel.add(new Option(c, c)));
+            
+            const buildSel = document.getElementById('buildFilter');
+            builds.forEach(b => buildSel.add(new Option(b, b)));
+        }
+        
+        function applyFilters() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const cat = document.getElementById('catFilter').value;
+            const build = document.getElementById('buildFilter').value;
+            
+            const filtered = results.filter(r => {
+                const matchQ = (r.app_name || '').toLowerCase().includes(query) || (r.primary_auth || '').toLowerCase().includes(query);
+                const matchC = cat ? r.category === cat : true;
+                const matchB = build ? r.buildability === build : true;
+                return matchQ && matchC && matchB;
+            });
+            renderTable(filtered);
+        }
+
+        let sortCol = 1;
+        let sortAsc = true;
+        function sortTable(colIndex) {
+            const keys = ['', 'app_name', 'category', 'primary_auth', 'access_level', 'buildability'];
+            const key = keys[colIndex];
+            
+            if (sortCol === colIndex) sortAsc = !sortAsc;
+            else { sortCol = colIndex; sortAsc = true; }
+            
+            results.sort((a, b) => {
+                const valA = (a[key] || '').toLowerCase();
+                const valB = (b[key] || '').toLowerCase();
+                if (valA < valB) return sortAsc ? -1 : 1;
+                if (valA > valB) return sortAsc ? 1 : -1;
+                return 0;
+            });
+            
+            applyFilters();
+        }
+
+        // Initialize Everything
+        window.onload = () => {
+            initStats();
+            initInsights();
+            initCharts();
+            populateFilters();
+            renderTable(results);
+            
+            // Event Listeners
+            document.getElementById('searchInput').addEventListener('input', applyFilters);
+            document.getElementById('catFilter').addEventListener('change', applyFilters);
+            document.getElementById('buildFilter').addEventListener('change', applyFilters);
+        };
+    </script>
+</body>
+</html>
